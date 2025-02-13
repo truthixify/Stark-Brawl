@@ -55,6 +55,7 @@ curl -L https://install.dojoengine.org | bash
   # or
   yarn dev
   Open http://localhost:3000/ in your browser to play.
+```
 
 🔗 Blockchain Implementation with Dojo
   This project uses Dojo to handle on-chain game logic on Starknet. The Cairo contracts store:
@@ -62,6 +63,7 @@ curl -L https://install.dojoengine.org | bash
 Ownership of characters as NFTs.
   Player progression (waves survived, rewards earned).
   Token system for upgrades and skins.
+  
   📜 Deploying Contracts with Dojo
   🏗️ Compile Cairo Contracts
     cd contract
@@ -69,6 +71,7 @@ Ownership of characters as NFTs.
 
 🚀 Deploy to Starknet Testnet
     dojo deploy --network testnet
+    
 🔗 Connect the Frontend to the Contracts
     Update contract addresses in client/src/blockchain/config.ts:
     export const CONTRACT_ADDRESS = "0xYOUR_CONTRACT";
@@ -79,6 +82,8 @@ Ownership of characters as NFTs.
   Select your NFT character.
   Survive waves of enemies and earn token rewards.
   Use tokens to upgrade skills or buy NFT skins.
+
+```
 📜 Project Structure
 stark-brawl/
 │── client/                 # Frontend (React + Vite)
@@ -109,6 +114,7 @@ stark-brawl/
 │── .gitignore              # Git ignored files
 │── README.md               # Project documentation
 │── LICENSE                 # License file
+```
 
 🤝 Contributions
   If you want to contribute, fork the repository, create a new branch with your changes, and submit a pull request.
