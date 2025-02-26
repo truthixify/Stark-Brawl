@@ -39,22 +39,22 @@ Ensure you have the following installed:
 - **Starknet Wallet Extension** (Argent X or Braavos)
 - **Dojo CLI** (to compile Cairo contracts)
 
-Install Dojo:
-
+## Install Dojo:
+   curl -L https://install.dojoengine.org | bash
+## Initializes the project and installs dependencies
 ```sh
-curl -L https://install.dojoengine.org | bash
 📥 Clone the Repository
   git clone https://github.com/youruser/stark-brawl.git
   cd stark-brawl
 📦 Install Dependencies
-  npm install
-  # or
-  yarn install
+    npm install
+   # or
+    yarn install
 🚀 Run the Project
-  npm run dev
-  # or
-  yarn dev
-  Open http://localhost:3000/ in your browser to play.
+    npm run dev
+   # or
+   yarn dev
+   Open http://localhost:3000/ in your browser to play.
 ```
 
 🔗 Blockchain Implementation with Dojo
@@ -116,6 +116,30 @@ stark-brawl/
 │── LICENSE                 # License file
 ```
 
+## Sozo Commands for Running a Project in Dojo with Cairo
+
+```sh
+# Initialize Dojo
+sozo init
+
+# Build the project
+sozo build
+
+# Run migrations (optional)
+sozo migrate
+
+# Start the project locally
+sozo start
+
+# Run tests
+sozo test
+
+# Clean previous builds
+sozo clean
+
+# Display help and available commands
+sozo help
+```
 🤝 Contributions
   If you want to contribute, fork the repository, create a new branch with your changes, and submit a pull request.
     git checkout -b my-new-feature
