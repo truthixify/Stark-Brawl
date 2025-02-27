@@ -23,7 +23,7 @@ version = "2.9.2"
 source = "git+https://github.com/dojoengine/dojo?tag=v1.1.1#dba10f26191bce47bb442ddc626ba7c6e2d8c160"
 
 [[package]]
-name = "dojo_starter"
+name = "stark_brawl"
 version = "1.1.0"
 dependencies = [
  "dojo",
