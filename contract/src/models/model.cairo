@@ -8,9 +8,9 @@ enum MatchStatus {
 
 // Define the match structure
 struct Match {
-    status: felt,      // The current status of the match (NotStarted, InProgress, Finished)
-    teams: felt*,      // List of teams in the match
-    team_alive: felt*, // List of 1 or 0 indicating whether the teams are still alive
+    status: felt,      
+    teams: felt*,      
+    team_alive: felt*,
 }
 
 // Function to initialize the match
