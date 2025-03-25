@@ -1,7 +1,13 @@
-export default function ShopPage() {
-  return (
-    <div className="min-h-screen bg-gray-900 p-6 text-white">
-    
-    </div>
-  );
-}
+import ShopLayout from '../components/shop/ShopLayout';
+
+const Shop = () => {
+    return (
+        <ShopLayout>
+            <div className="text-white">
+                {/* Content will be rendered by ShopNavigationTabs */}
+            </div>
+        </ShopLayout>
+    );
+};
+
+export default Shop; 
