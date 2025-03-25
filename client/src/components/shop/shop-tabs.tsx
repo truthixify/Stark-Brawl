@@ -19,9 +19,9 @@ export function ShopTabs({ activeTab, setActiveTab }: ShopTabsProps) {
   const brawlers: ShopItem[] = [
     {
       id: "1",
-      name: "Inferno Max",
+      name: "Cyber Warrior",
       description: "A fire-powered brawler.",
-      image: "/assets/inferno-max.png",
+      image: "/nft4.png",
       price: 1.5,
       priceType: "eth",
       discount: 0,
@@ -35,9 +35,9 @@ export function ShopTabs({ activeTab, setActiveTab }: ShopTabsProps) {
     },
     {
       id: "2",
-      name: "Shadow Lynx",
+      name: "Mystic Archer",
       description: "A stealthy brawler.",
-      image: "/assets/shadow-lynx.png",
+      image: "nft2.png",
       price: 750,
       priceType: "coins",
       discount: 10,
@@ -86,7 +86,8 @@ export function ShopTabs({ activeTab, setActiveTab }: ShopTabsProps) {
         {activeTab === "featured" && (
           <BrawlersGrid brawlers={brawlers} onSelectBrawler={setSelectedBrawler} />
         )}
-        {selectedBrawler && <BrawlerDetailsModal brawler={selectedBrawler} onClose={() => setSelectedBrawler(null)} />}
+        {selectedBrawler && <BrawlerDetailsModal brawler={selectedBrawler} onClose={() => setSelectedBrawler(null)} onBuyNow={() => {}}
+          onAddToCart={() => {}} />}
       </Tabs>
     </div>
   );
