@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { KeysClause, ToriiQueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { AccountInterface, addAddressPadding, CairoCustomEnum } from "starknet";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 import { ModelsMapping } from "./typescript/models.gen.ts";
 import { useSystemCalls } from "./useSystemCalls.ts";
@@ -9,6 +10,7 @@ import { useAccount } from "@starknet-react/core";
 import { WalletAccount } from "./wallet-account.tsx";
 import { HistoricalEvents } from "./historical-events.tsx";
 import { useDojoSDK, useModel } from "@dojoengine/sdk/react";
+import Shop from "./pages/Shop";
 
 /**
  * Main application component that provides game functionality and UI.
@@ -16,7 +18,7 @@ import { useDojoSDK, useModel } from "@dojoengine/sdk/react";
  *
  * @param props.sdk - The Dojo SDK instance configured with the game schema
  */
-function App() {
+function Game() {
     const { useDojoStore, client, sdk } = useDojoSDK();
     const { account } = useAccount();
     const state = useDojoStore((state) => state);
@@ -257,6 +259,25 @@ function App() {
                 <HistoricalEvents />
             </div>
         </div>
+    );
+}
+
+function App() {
+    return (
+        <Router>
+            <div className="bg-black min-h-screen w-full">
+                <nav className="bg-gray-800 p-4">
+                    <div className="max-w-7xl mx-auto flex space-x-4">
+                        <Link to="/" className="text-white hover:text-gray-300">Game</Link>
+                        <Link to="/shop" className="text-white hover:text-gray-300">Shop</Link>
+                    </div>
+                </nav>
+                <Routes>
+                    <Route path="/" element={<Game />} />
+                    <Route path="/shop" element={<Shop />} />
+                </Routes>
+            </div>
+        </Router>
     );
 }
 
