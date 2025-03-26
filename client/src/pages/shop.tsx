@@ -1,13 +1,10 @@
-import ShopLayout from '../components/shop/ShopLayout';
+import ShopLayout from "@/components/shop/ShopLayout";
 
-const Shop = () => {
-    return (
-        <ShopLayout>
-            <div className="text-white">
-                {/* Content will be rendered by ShopNavigationTabs */}
-            </div>
-        </ShopLayout>
-    );
-};
+export default function ShopPage() {            
 
-export default Shop; 
+  return (
+    <div className="pl-2 text-white bg-gradient-to-r from-purple-700 via-purple-500 to-orange-500 min-h-screen ">
+      <ShopLayout />
+    </div>
+  );
+}
