@@ -1,5 +1,5 @@
 import React from "react";
-import { Clan } from "./mockData";
+import { Clan } from "@/components/SocialHub/sections/utils/mockData";
 import { Trophy, Users, Globe, ChevronRight } from "lucide-react";
 
 interface ClanCardProps {
@@ -62,13 +62,14 @@ const ClanCard: React.FC<ClanCardProps> = ({ clan, onViewClick }) => {
 				</p>
 				<div className="flex items-center  justify-between mt-2">
 					<div className=" flex items-center gap-1">
-						<Globe size={14} className=" text-gray-300" /> <p className=" text-[12.5px] font-medium text-gray-200">{clan.region}</p>
+						<Globe size={14} className=" text-gray-300" />{" "}
+						<p className=" text-[12.5px] font-medium text-gray-200">{clan.region}</p>
 					</div>
 					<button
 						onClick={() => onViewClick(clan)}
 						className="flex items-center  bg-blue-500 hover:bg-blue-400 text-white px-3 py-2 text-sm gap-[6.5px] font-semibold rounded "
 					>
-                        <ChevronRight size={16}/>
+						<ChevronRight size={16} />
 						View
 					</button>
 				</div>

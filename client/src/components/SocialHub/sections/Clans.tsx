@@ -1,8 +1,8 @@
 import { useState } from "react";
-import ClanCard from "./utils/clanCard";
-import ClanDetailsModal from "./utils/ClanDetailsModal";
-import { clansData } from "./utils/mockData";
-import { Clan } from "./utils/mockData";
+import ClanCard from "@/components/SocialHub/sections/utils//ClanCard";
+import ClanDetailsModal from "@/components/SocialHub/sections/utils/ClanDetailsModal";
+import { clansData } from "@/components/SocialHub/sections/utils/mockData";
+import { Clan } from "@/components/SocialHub/sections/utils/mockData";
 
 const Clans = ({ searchQuery }: { searchQuery: string }) => {
 	const [selectedClan, setSelectedClan] = useState<Clan | null>(null);

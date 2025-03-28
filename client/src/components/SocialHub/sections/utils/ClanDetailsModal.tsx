@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Clan } from "./mockData";
 import { Trophy, Users, Info, Globe } from "lucide-react";
-import RequestToJoin from "./RequestToJoin";
+import { motion, AnimatePresence } from "framer-motion";
+import { Clan } from "@/components/SocialHub/sections/utils/mockData";
+import RequestToJoin from "@/components/SocialHub/sections/utils/RequestToJoin";
+
 interface ClanDetailsModalProps {
 	clan: Clan | null;
 	onClose: () => void;
@@ -145,11 +146,9 @@ const ClanDetailsModal: React.FC<ClanDetailsModalProps> = ({ clan, onClose }) =>
 								</p>
 							</div>
 
-					
-
-						<div className=" flex justify-end">
-						<RequestToJoin status={clan.status} />
-						</div>
+							<div className=" flex justify-end">
+								<RequestToJoin status={clan.status} />
+							</div>
 						</motion.div>
 					</motion.div>
 				</motion.div>
