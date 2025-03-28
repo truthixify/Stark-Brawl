@@ -1,12 +1,12 @@
-import React from 'react'
+import { Dispatch, SetStateAction } from 'react';
+import { FriendRequest } from '../../../types/friend';
+import { FriendRequestsList } from './Requests/FriendRequestsList';
 
-const Requests = () => {
-  return (
-    <div className="text-white">
-      <h2>Friend Requests</h2>
-      {/* Placeholder content */}
-    </div>
-  )
+interface RequestsProps {
+  requests: FriendRequest[];
+  setRequests: Dispatch<SetStateAction<FriendRequest[]>>;
 }
 
-export default Requests 
+export default function Requests({ requests, setRequests }: RequestsProps) {
+  return <FriendRequestsList requests={requests} setRequests={setRequests} />;
+}
