@@ -52,7 +52,7 @@ const ClanCard: React.FC<ClanCardProps> = ({ clan, onViewClick }) => {
 					</div>
 					<div className=" flex items-center gap-[4px]">
 						<Users size={15} className=" text-blue-400 font-bold" />{" "}
-						<p className=" text-[12.5px] font-semibold">
+						<p className=" text-gray-100 text-[12.5px] font-semibold">
 							{clan.members}/{clan.maxMembers}
 						</p>
 					</div>
