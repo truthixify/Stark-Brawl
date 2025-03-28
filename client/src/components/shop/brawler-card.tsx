@@ -15,7 +15,7 @@ interface BrawlerCardProps {
 const BrawlerCard = ({ brawler, onClick }: BrawlerCardProps) => {
   return (
         <div
-      className={`bg-gradient-to-br ${getRarityBgColor(brawler.rarity)} rounded-xl overflow-hidden border-2 ${getRarityBorderColor(brawler.rarity)} hover:shadow-lg hover:shadow-pink-500/20 transition-all duration-300`}
+      className={`bg-gradient-to-br ${getRarityBgColor(brawler.rarity)} rounded-xl overflow-hidden border-2 ${getRarityBorderColor(brawler.rarity)} hover:shadow-lg hover:shadow-pink-500/20 transition-all duration-300 cursor-pointer`}
       onClick={onClick}
     >
       <div className="p-4">
