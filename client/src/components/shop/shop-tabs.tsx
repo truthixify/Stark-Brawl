@@ -7,7 +7,7 @@ import {
   TabsTrigger,
   TabsContent
 } from "@/components/ui/tabs";
-import { Sparkles, Coins, Gem, Crown } from "lucide-react";
+import { Sparkles, Coins, Gem, Crown, Gift, Wallet } from "lucide-react";
 import BrawlersGrid from "./BrawlersGrid";
 import BrawlerDetailsModal from "./brawler-details-modal";
 import SkinCard from "../skin-shop/skin-card"; 
@@ -56,6 +56,18 @@ export function ShopTabs({ activeTab, setActiveTab }: ShopTabsProps) {
     }
   ];
 
+  const nftItems = brawlers.filter(
+    (item) =>
+      item.isNFT &&
+      (!item.isLimited || item.timeRemaining !== "Expired")
+  );
+  
+  const bundleItems = brawlers.filter(
+    (item) =>
+      item.category === "bundles" &&
+      (!item.isLimited || item.timeRemaining !== "Expired")
+  );
+
   return (
     <div className="text-white">
       <Tabs
@@ -75,6 +87,17 @@ export function ShopTabs({ activeTab, setActiveTab }: ShopTabsProps) {
           >
             <Sparkles className="h-4 w-4 mr-2" />
             Featured
+          </TabsTrigger>
+          <TabsTrigger
+            value="skins"
+            className={`${
+              activeTab === "skins"
+                ? "bg-gradient-to-r from-pink-500 to-orange-500 text-white"
+                : "text-white/70"
+            } py-2`}
+          >
+            <Crown className="h-4 w-4 mr-2" />
+            Skins
           </TabsTrigger>
           <TabsTrigger
             value="gems"
@@ -98,18 +121,29 @@ export function ShopTabs({ activeTab, setActiveTab }: ShopTabsProps) {
             <Coins className="h-4 w-4 mr-2" />
             Coins
           </TabsTrigger>
-
           <TabsTrigger
-            value="skins"
+            value="bundles"
             className={`${
-              activeTab === "skins"
+              activeTab === "bundles"
                 ? "bg-gradient-to-r from-pink-500 to-orange-500 text-white"
                 : "text-white/70"
             } py-2`}
           >
-            <Crown className="h-4 w-4 mr-2" />
-            Skins
+            <Gift className="h-4 w-4 mr-2" />
+            Bundles
           </TabsTrigger>
+          <TabsTrigger
+            value="nfts"
+            className={`${
+              activeTab === "nfts"
+                ? "bg-gradient-to-r from-pink-500 to-orange-500 text-white"
+                : "text-white/70"
+            } py-2`}
+          >
+            <Wallet className="h-4 w-4 mr-2" />
+            NFTs
+          </TabsTrigger>
+
         </TabsList>
 
         {activeTab === "featured" && (
@@ -122,6 +156,20 @@ export function ShopTabs({ activeTab, setActiveTab }: ShopTabsProps) {
         <TabsContent value="skins">
           <SkinCard />
         </TabsContent>
+
+        <TabsContent value="nfts">
+        <BrawlersGrid
+          brawlers={nftItems}
+          onSelectBrawler={setSelectedBrawler}
+        />
+      </TabsContent>
+
+      <TabsContent value="bundles">
+        <BrawlersGrid
+          brawlers={bundleItems}
+          onSelectBrawler={setSelectedBrawler}
+        />
+      </TabsContent>
 
         {selectedBrawler && (
           <BrawlerDetailsModal
