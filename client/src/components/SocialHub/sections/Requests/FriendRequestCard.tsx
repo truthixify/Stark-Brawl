@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { FriendRequest } from '../types/friend';
-import { Button } from './ui/button';
+import { FriendRequest } from '../../../../types/friend';
+import { Button } from '../../../ui/button';
 import { Clock, Star, Users } from 'lucide-react';
 
 interface FriendRequestCardProps {

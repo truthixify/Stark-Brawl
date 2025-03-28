@@ -1,4 +1,4 @@
-import { FriendRequest } from '../types/friend';
+import { FriendRequest } from '../../../../types/friend';
 
 export const mockFriendRequests: FriendRequest[] = [
   {
