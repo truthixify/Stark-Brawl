@@ -48,11 +48,11 @@ const SocialHubLayout = () => {
                   </span>
                 </span>
                 <div className="flex items-center gap-2">
-                  <button className="flex items-center px-2 py-1 bg-[#5a0573c2] rounded-[6px] border border-[#a76dca80] border-[0.5px]">
+                  <button className="flex items-center px-2 py-1 bg-[#5a0573c2] rounded-[6px] border border-[#a76dca80]">
                     <img src="/trophy.png" alt="Trophy" className="w-3 h-3 mr-1 filter brightness-0 invert" />
                     <span className="text-white text-xs">15644</span>
                   </button>
-                  <button className="flex items-center px-2 py-1 bg-[#5a0573c2] rounded-[6px] border border-[#a76dca80] border-[0.5px]">
+                  <button className="flex items-center px-2 py-1 bg-[#5a0573c2] rounded-[6px] border border-[#a76dca80]">
                     <img src="/wallet.png" alt="Wallet" className="w-3 h-3 mr-1 filter brightness-0 invert" />
                     <span className="text-white/70 text-[10px]">0x1234...5678</span>
                   </button>
@@ -61,17 +61,17 @@ const SocialHubLayout = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 mt-2 md:mt-0">
-            <button className="flex items-center px-2 py-1 bg-[#5a0573c2] rounded-[6px] border border-[#a76dca80] border-[0.5px]">
+            <button className="flex items-center px-2 py-1 bg-[#5a0573c2] rounded-[6px] border border-[#a76dca80]">
               <svg className="w-2 h-2 mr-1" fill="none" stroke="pink" strokeWidth={2} viewBox="0 0 20 20">
                 <path d="M10 15.27L16.18 19l-1.64-7.03L20 7.24l-7.19-.61L10 0 7.19 6.63 0 7.24l5.46 4.73L3.82 19z" />
               </svg>
               <span className="text-white text-xs">5546</span>
             </button>
-            <button className="flex items-center px-2 py-1 bg-[#5a0573c2] rounded-[6px] border border-[#a76dca80] border-[0.5px]">
+            <button className="flex items-center px-2 py-1 bg-[#5a0573c2] rounded-[6px] border border-[#a76dca80]">
               <img src="/crown.png" alt="crown" className="w-3 h-3 filter brightness-0 invert mr-1" />
               <span className="text-white text-xs">489</span>
             </button>
-            <button className="flex items-center px-2 py-2.5 bg-[#5a0573c2] rounded-[6px] border border-[#a76dca80] border-[0.5px] mr-2">
+            <button className="flex items-center px-2 py-2.5 bg-[#5a0573c2] rounded-[6px] border border-[#a76dca80] mr-2">
               <img src="/volume-up.png" alt="volume" className="w-3 h-3 filter brightness-0 invert" />
             </button>
           </div>
