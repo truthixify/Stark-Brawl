@@ -24,7 +24,7 @@ const ClanCard: React.FC<ClanCardProps> = ({ clan, onViewClick }) => {
 	return (
 		<div
 			onClick={() => onViewClick(clan)}
-			className="bg-purple-800/60 p-4  shadow-lg flex justify-between items-center rounded-xl"
+			className="bg-purple-700/50 p-4  border border-purple-600 flex justify-between items-center rounded-xl"
 		>
 			<div className=" flex flex-col gap-3 w-full ">
 				<div className=" flex items-start justify-between">
@@ -57,7 +57,7 @@ const ClanCard: React.FC<ClanCardProps> = ({ clan, onViewClick }) => {
 						</p>
 					</div>
 				</div>
-				<p className="text-gray-300 font-medium bg-purple-800/40 p-2 text-sm rounded">
+				<p className="text-gray-300 font-medium bg-purple-900/40 p-2 text-sm rounded">
 					{clan.description}
 				</p>
 				<div className="flex items-center  justify-between mt-2">

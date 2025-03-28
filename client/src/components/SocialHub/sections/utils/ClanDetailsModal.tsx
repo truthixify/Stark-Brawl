@@ -1,17 +1,17 @@
-// ClanDetailsModal.tsx
 "use client";
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clan } from "./mockData";
 import { Trophy, Users, Info, Globe } from "lucide-react";
+import RequestToJoin from "./RequestToJoin";
 interface ClanDetailsModalProps {
 	clan: Clan | null;
 	onClose: () => void;
 	onRequestJoin: (clan: Clan) => void;
 }
 
-const ClanDetailsModal: React.FC<ClanDetailsModalProps> = ({ clan, onClose, onRequestJoin }) => {
+const ClanDetailsModal: React.FC<ClanDetailsModalProps> = ({ clan, onClose }) => {
 	if (!clan) return null;
 
 	const getStatusStyle = (status: Clan["status"]): string => {
@@ -46,7 +46,7 @@ const ClanDetailsModal: React.FC<ClanDetailsModalProps> = ({ clan, onClose, onRe
 						className="bg-gradient-to-br from-[#553376] to-[#6d0664f2] rounded-xl"
 					>
 						<motion.div
-							className="bg-gradient-to-br from-purple-800/50 to-pink-100/5 rounded-xl p-6 w-[620px]  border-2 border-[#7530ba]"
+							className="bg-gradient-to-br from-purple-800/50 to-pink-100/5 rounded-xl p-6 w-full xl:w-[620px]  border-2 border-[#7530ba]"
 							onClick={(e) => e.stopPropagation()}
 						>
 							<div className="flex justify-between items-start mb-4">
@@ -67,8 +67,7 @@ const ClanDetailsModal: React.FC<ClanDetailsModalProps> = ({ clan, onClose, onRe
 								</button>
 							</div>
 
-							{/* Stats Section: Trophies and Members */}
-							<div className="flex items-center justify-between mb-4 gap-3">
+							<div className="flex flex-wrap items-center justify-between mb-4 gap-3">
 								<div
 									className="flex-1 bg-purple-500/20  p-3 rounded-md border-2 border-[#7530ba]"
 									style={{ borderRadius: "8px" }}
@@ -89,7 +88,9 @@ const ClanDetailsModal: React.FC<ClanDetailsModalProps> = ({ clan, onClose, onRe
 								>
 									<div className="flex items-center gap-2">
 										<Users size={15} className=" text-blue-400 font-bold" />{" "}
-										<p className="text-gray-100 text-[15px]  font-black">Members</p>
+										<p className="text-gray-100 text-[15px]  font-black">
+											Members
+										</p>
 									</div>
 									<p className="text-gray-200 text-base font-medium">
 										{clan.members}/{clan.maxMembers}
@@ -97,21 +98,21 @@ const ClanDetailsModal: React.FC<ClanDetailsModalProps> = ({ clan, onClose, onRe
 								</div>
 							</div>
 
-							{/* Description Section */}
 							<div
 								className="bg-[#4a2a6b] p-3 rounded-lg mb-4 bg-purple-500/20 border-2 border-[#7530ba]"
 								style={{ borderRadius: "8px" }}
 							>
 								<div className="flex items-center gap-[6px] mb-2">
 									<Info size={15} className=" text-blue-400 font-bold" />
-									<p className="text-gray-100 text-[15px]  font-black">Description</p>
+									<p className="text-gray-100 text-[15px]  font-black">
+										Description
+									</p>
 								</div>
 								<p className="text-gray-300 font-semibold text-[15px]">
 									{clan.description}
 								</p>
 							</div>
 
-							{/* Region and Status */}
 							<div className="flex justify-between items-center mb-4">
 								<div className="flex items-center gap-2">
 									<Globe size={16} className="text-green-400 mt-[1.5px]" />
@@ -129,7 +130,6 @@ const ClanDetailsModal: React.FC<ClanDetailsModalProps> = ({ clan, onClose, onRe
 								</span>
 							</div>
 
-							{/* Required Trophies */}
 							<div
 								className="bg-[#4a2a6b] p-3 rounded-lg mb-4 bg-purple-500/20 border-2 border-[#7530ba]"
 								style={{ borderRadius: "8px" }}
@@ -145,9 +145,11 @@ const ClanDetailsModal: React.FC<ClanDetailsModalProps> = ({ clan, onClose, onRe
 								</p>
 							</div>
 
-							{/* Action Button */}
-						
-							
+					
+
+						<div className=" flex justify-end">
+						<RequestToJoin status={clan.status} />
+						</div>
 						</motion.div>
 					</motion.div>
 				</motion.div>
