@@ -1,10 +1,12 @@
 import React from 'react'
+import { useState } from 'react'
 import SocialNavigationTabs from './SocialNavigationTabs'
 import { Friends, Requests, Messages, Clans } from './sections'
 import Sidebar from './Sidebar'
 
 const SocialHubLayout = () => {
   const [activeTab, setActiveTab] = React.useState('friends')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const renderContent = () => {
     switch (activeTab) {
@@ -15,7 +17,7 @@ const SocialHubLayout = () => {
       case 'messages':
         return <Messages />
       case 'clans':
-        return <Clans />
+        return <Clans searchQuery={searchQuery} />
       default:
         return <Friends />
     }
@@ -91,6 +93,8 @@ const SocialHubLayout = () => {
                   type="text"
                   placeholder="Search friends or clans..."
                   className="w-full p-2 bg-transparent border-0 focus:outline-none text-white"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <SocialNavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
@@ -105,4 +109,4 @@ const SocialHubLayout = () => {
   )
 }
 
-export default SocialHubLayout 
+export default SocialHubLayout
