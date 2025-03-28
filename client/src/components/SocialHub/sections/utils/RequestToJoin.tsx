@@ -16,8 +16,17 @@ const RequestToJoin = ({ status }: Props) => {
 				return <UserPlus size={13} />;
 		}
 	};
+
+	const handleClick = (status: string) => {
+		if (status === "Open") {
+			alert("You have joined the clan");
+		} else if (status === "Invite Only") {
+			alert("You have requested to join the clan");
+		}
+	};
 	return (
 		<button
+			onClick={() => handleClick(status)}
 			disabled={status === "Closed"}
 			className={`w-max bg-blue-600 ${
 				status === "Open" && "bg-green-600 hover:bg-green-500"
