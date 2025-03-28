@@ -14,12 +14,12 @@ import SkinCard from "../skin-shop/skin-card";
 import { ShopItem } from "./@types/shop-types";
 
 interface ShopTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+	activeTab: string;
+	setActiveTab: (tab: string) => void;
 }
 
 export function ShopTabs({ activeTab, setActiveTab }: ShopTabsProps) {
-  const [selectedBrawler, setSelectedBrawler] = useState<ShopItem | null>(null);
+	const [selectedBrawler, setSelectedBrawler] = useState<ShopItem | null>(null);
 
   const brawlers: ShopItem[] = [
     {
