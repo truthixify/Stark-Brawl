@@ -34,7 +34,6 @@
     "react-router-dom": "^7.4.0",
     "starknet": "6.21.0",
     "tailwind-merge": "^3.0.2",
-    "tailwindcss": "^2.x.x",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
     "vite-plugin-top-level-await": "^1.4.4",
