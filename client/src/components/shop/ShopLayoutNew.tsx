@@ -1,10 +1,8 @@
-import { useState } from 'react';
+import { useState, PropsWithChildren } from 'react';
 import ShopTabs from './shop-tabs';
 import BannerCarousel from './BannerCarousel';
 import { ShoppingCartIcon } from 'lucide-react';
 import TopBar from './TopBar';
-
-import { PropsWithChildren } from 'react';
 
 const ShopLayout: React.FC<PropsWithChildren<unknown>> = ({ children }) => {
     const [activeTab, setActiveTab] = useState("featured");
@@ -46,9 +44,9 @@ const ShopLayout: React.FC<PropsWithChildren<unknown>> = ({ children }) => {
             <ShopTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
             {/* Main Content */}
-<main className="container mx-auto px-4">
-    {children}
-</main>
+            <main className="container mx-auto px-4">
+                {children}
+            </main>
         </div>
     );
 };
