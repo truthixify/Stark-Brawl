@@ -9,8 +9,7 @@ export const GameBackground: React.FC = () => {
                 style={{
                     backgroundImage: 'url("/homeBackground.png")',
                     backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    filter: 'brightness(0.9)'
+                    backgroundPosition: 'center'
                 }}
             />
             
