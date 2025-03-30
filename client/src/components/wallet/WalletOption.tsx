@@ -16,7 +16,7 @@ export const WalletOption: React.FC<WalletOptionProps> = ({ name, icon, onClick 
         >
             <div className="flex items-center">
                 <div className="w-8 h-8 flex items-center justify-center rounded-full overflow-hidden bg-white">
-                    <img src={icon} alt={name} className="w-6 h-6 object-contain" />
+                    <img src={icon} alt={name} className="w-8 h-8 object-contain" />
                 </div>
                 <span className="ml-3 font-medium">{name}</span>
             </div>
