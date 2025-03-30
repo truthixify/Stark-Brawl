@@ -10,7 +10,7 @@ export const GameBackground: React.FC = () => {
                     backgroundImage: 'url("/homeBackground.png")',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    filter: 'brightness(0.8)'
+                    filter: 'brightness(0.9)'
                 }}
             />
             

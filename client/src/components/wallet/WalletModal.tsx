@@ -6,11 +6,11 @@ type WalletModalProps = {
     isOpen: boolean;
     onClose: () => void;
 };
-// Importing necessary styles or additional dependencies if required
+
 export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
-    // Supported wallets data (for the example)
+    // Supported wallets data
     const wallets = [
         { id: 'argent', name: 'Argent X', icon: '/wallets/argent.svg' },
         { id: 'braavos', name: 'Braavos', icon: '/wallets/braavos.png' },
@@ -18,17 +18,17 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
         { id: 'metamask', name: 'MetaMask Starknet', icon: '/wallets/metamask.svg' },
     ];
 
-    // Onchain features for the example
+    // Onchain features 
     const features = [
-        { id: 'nft', name: 'Brawlers NFT', icon: '/features/nft.png', color: 'bg-purple-600' },
-        { id: 'token', name: 'Token BRAWLS', icon: '/features/token.png', color: 'bg-blue-600' },
-        { id: 'marketplace', name: 'Marketplace', icon: '/features/marketplace.png', color: 'bg-green-600' },
-        { id: 'p2e', name: 'Play-to-Earn', icon: '/features/p2e.png', color: 'bg-yellow-600' },
+        { id: 'nft', name: 'Brawlers NFT', icon: '/features/nft.png' },
+        { id: 'token', name: 'Token BRAWLS', icon: '/features/token.png' },
+        { id: 'marketplace', name: 'Marketplace', icon: '/features/marketplace.png' },
+        { id: 'p2e', name: 'Play-to-Earn', icon: '/features/p2e.png' },
     ];
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-            {/* Backdrop with blur effect */}
+            {/* Backdrop with darker blur effect */}
             <div 
                 className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
                 onClick={onClose}
@@ -36,39 +36,39 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
             
             {/* Modal container */}
             <div 
-                className="relative bg-gradient-to-b from-gray-900 to-gray-800 rounded-xl shadow-2xl 
-                                    max-w-md w-full mx-4 overflow-hidden border border-gray-700"
+                className="relative bg-black bg-opacity-40 rounded-xl shadow-2xl 
+                                    max-w-sm w-full overflow-hidden border border-gray-700"
                 onClick={(e) => e.stopPropagation()}
+                style={{ maxWidth: '380px' }}
             >
                 {/* Logo and title */}
-                <div className="flex items-center p-4 border-b border-gray-700">
+                <div className="flex items-center p-3 border-b border-gray-800">
                     <div className="flex items-center">
                         <img 
                             src="/1.png" 
                             alt="Stark Brawl" 
-                            className="w-8 h-8 mr-2"
+                            className="w-7 h-7 mr-2"
                         />
-                        <div className="text-white font-bold">STARKNET EDITION</div>
+                        <div className="text-white font-bold text-sm">STARKNET EDITION</div>
                     </div>
                     <button 
                         onClick={onClose}
                         className="ml-auto text-gray-400 hover:text-white"
                     >
-                        <span className="sr-only">Close</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <span className="sr-only">Sound</span>
+                        <img src="/sound.svg" />
                     </button>
                 </div>
                 
                 {/* Modal content */}
-                <div className="p-6">
-                    <h2 className="text-2xl font-bold text-white mb-1">Connect Your Wallet</h2>
-                    <p className="text-gray-300 mb-6">
+                <div className="p-4">
+                    <h2 className="text-xl font-bold text-white mb-1 text-center">Connect Your Wallet</h2>
+                    <p className="text-gray-300 mb-4 text-sm text-center">
                         Connect your Starknet wallet to play and manage your onchain assets
                     </p>
-                    {/* Wallet list */}
-                    <div className="space-y-3 mb-8">
+                    
+                    {/* Wallet list  */}
+                    <div className="space-y-2 mb-6">
                         {wallets.map(wallet => (
                             <WalletOption 
                                 key={wallet.id} 
@@ -79,26 +79,23 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
                         ))}
                     </div>
                     
-                    {/* Separator */}
-                    <div className="relative my-8">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-600"></div>
-                        </div>
-                        <div className="relative flex justify-center">
-                            <span className="bg-gray-800 px-3 text-sm text-gray-400">
+                    {/* Simplified separator */}
+                    <div className="relative mb-4">
+                        <div className="border-t border-gray-700"></div>
+                        <div className="flex justify-center -mt-2.5">
+                            <span className="bg-black px-3 text-xs text-gray-400">
                                 Onchain Features
                             </span>
                         </div>
                     </div>
                     
                     {/* Feature cards */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                         {features.map(feature => (
                             <FeatureCard 
                                 key={feature.id}
                                 name={feature.name}
                                 icon={feature.icon}
-                                color={feature.color}
                             />
                         ))}
                     </div>
