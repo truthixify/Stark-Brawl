@@ -3,6 +3,7 @@ import ShopPage from "./pages/shop"
 import SocialPage from "./pages/social"
 import EventsPage from "./pages/events"
 import HomePage from "./pages/home"
+import LeaderboardPage from "./pages/Leaderboard"
 
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/social" element={<SocialPage />} />
         <Route path="/events" element={<EventsPage />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
 
       </Routes>
     </BrowserRouter>
