@@ -7,11 +7,9 @@ import HomePage from "./pages/home"
 import LeaderboardPage from "./pages/Leaderboard"
 
 
-import HomePage from "@/pages/home"
-import ShopPage from "@/pages/shop"
-import SocialPage from "@/pages/social"
-import EventsPage from "@/pages/events"
+
 import Brawlers from "@/pages/brawlers"
+import PlayerProfile from "./components/PlayerProfile/PlayerProfile"
 
 export default function App() {
   return (
@@ -22,6 +20,7 @@ export default function App() {
         <Route path="/social" element={<SocialPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/PlayerProfile" element={<PlayerProfile />} />
 
        
 
