@@ -5,12 +5,6 @@ import SocialPage from "./pages/social"
 import EventsPage from "./pages/events"
 import HomePage from "./pages/home"
 import LeaderboardPage from "./pages/Leaderboard"
-
-
-import HomePage from "@/pages/home"
-import ShopPage from "@/pages/shop"
-import SocialPage from "@/pages/social"
-import EventsPage from "@/pages/events"
 import Brawlers from "@/pages/brawlers"
 
 export default function App() {
