@@ -6,7 +6,7 @@ import MyMaps from "@/components/maps-ui/MyMaps";
 import CommunityMaps from "@/components/maps-ui/CommunityMaps";
 import { Map } from "lucide-react";
 const Maps = () => {
-	const [activeTab, setActiveTab] = useState<"Official" | "Community" | "My Maps">("Community");
+	const [activeTab, setActiveTab] = useState<"Official" | "Community" | "My Maps">("Official");
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const tabs: Array<"Official" | "Community" | "My Maps"> = ["Official", "Community", "My Maps"];
 
