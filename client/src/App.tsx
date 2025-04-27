@@ -6,7 +6,7 @@ import EventsPage from "./pages/events"
 import HomePage from "./pages/home"
 import LeaderboardPage from "./pages/Leaderboard"
 import Brawlers from "@/pages/brawlers"
-
+import Maps from "./pages/maps"
 export default function App() {
   return (
     <BrowserRouter>
@@ -16,6 +16,7 @@ export default function App() {
         <Route path="/social" element={<SocialPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/maps" element={<Maps />} />
 
        
 
