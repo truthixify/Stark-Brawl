@@ -4,10 +4,11 @@ pub struct Character {
     pub name: felt252,
     pub health: u256,
     pub attack: u256,
+    pub owner : felt252,
 }
 
-pub fn initialize_character(id: u256, name: felt252, health: u256, attack: u256) -> Character {
-    Character { id, name, health, attack }
+pub fn initialize_character(id: u256, name: felt252, health: u256, attack: u256 , owner : felt252) -> Character {
+    Character { id, name, health, attack , owner }
 }
 
 pub impl CharacterImpl of CharacterTrait<Character> {

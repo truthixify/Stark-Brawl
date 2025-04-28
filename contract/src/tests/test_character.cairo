@@ -5,9 +5,11 @@ fn init_default() -> Character {
     let name = 'Name';
     let health = 100;
     let attack = 10;
-    let character = initialize_character(id, name, health, attack);
+    let owner ='Owner';
+    let character = initialize_character(id, name, health, attack , owner);
     assert_eq!(character.id, id);
     assert_eq!(character.name, name);
+    assert_eq!(character.owner , owner);
     character
 }
 
