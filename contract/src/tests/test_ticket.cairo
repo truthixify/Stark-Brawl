@@ -1,45 +1,51 @@
-#[cfg(test)]
-mod TestTickets {
-    use starknet::ContractAddress;
-    use starknet::contract_address_const;
-    use super::Tickets;
-    use super::Tickets::{set_tickets, consume_ticket, get_tickets};
+use stark_brawl::models::tickets::*;
 
-    #[test]
-    #[available_gas(2000000)]
-    fn test_successful_ticket_consumption() {
-        let player: ContractAddress = contract_address_const::<1>();
-        // Set initial tickets
-        set_tickets(player, 5);
-        // Consume one ticket
-        consume_ticket();
-        // Verify remaining tickets
-        let remaining = get_tickets(player);
-        assert(remaining == 4, 'Ticket count should be 4');
-    }
+fn init_default_ticket() -> Tickets {
+    let player = 1;
+    let tickets = initialize_tickets(player);
 
-    #[test]
-    #[available_gas(2000000)]
-    #[should_panic(expected = ('No tickets available',))]
-    fn test_consume_with_zero_tickets() {
-        let player: ContractAddress = contract_address_const::<1>();
-        // Set zero tickets
-        set_tickets(player, 0);
-        // Attempt to consume (should fail)
-        consume_ticket();
-    }
+    assert(tickets.player == player, 'Player_ID_should_match');
+    assert(tickets.amount == 0, 'Ticket_amount_should_0');
+    
+    tickets
+}
 
-    #[test]
-    #[available_gas(2000000)]
-    fn test_multiple_consumptions() {
-        let player: ContractAddress = contract_address_const::<1>();
-        // Set initial tickets
-        set_tickets(player, 3);
-        // Consume two tickets
-        consume_ticket();
-        consume_ticket();
-        // Verify remaining tickets
-        let remaining = get_tickets(player);
-        assert(remaining == 1, 'Ticket count should be 1');
-    }
+#[test]
+fn test_initialize_tickets() {
+    let _ = init_default_ticket();
+}
+
+#[test]
+fn test_add_tickets() {
+    let mut tickets = init_default_ticket();
+    tickets.add_tickets(5);
+    assert(tickets.amount == 5, 'Ticket amount should be 5');
+}
+
+#[test]
+fn test_consume_ticket_success() {
+    let mut tickets = init_default_ticket();
+    tickets.add_tickets(3);
+
+    let result = tickets.consume_ticket();
+    assert(result == true, 'Ticket_should_consumed');
+    assert(tickets.amount == 2, 'Ticket_amount_decrease_by_1');
+}
+
+#[test]
+fn test_consume_ticket_failure() {
+    let mut tickets = init_default_ticket();
+
+    let result = tickets.consume_ticket();
+    assert(result == false, 'Ticket_not_onsumed');
+    assert(tickets.amount == 0, 'Ticket_amount_0');
+}
+
+#[test]
+fn test_get_tickets() {
+    let mut tickets = init_default_ticket();
+    tickets.add_tickets(7);
+
+    let current_tickets = tickets.get_tickets();
+    assert(current_tickets == 7, 'Ticket_amount_7');
 }
