@@ -1,17 +1,12 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import ShopPage from "./pages/shop"
-import SocialPage from "./pages/social"
-import EventsPage from "./pages/events"
-import HomePage from "./pages/home"
-import LeaderboardPage from "./pages/Leaderboard"
-
-
-import HomePage from "@/pages/home"
-import ShopPage from "@/pages/shop"
-import SocialPage from "@/pages/social"
-import EventsPage from "@/pages/events"
-import Brawlers from "@/pages/brawlers"
+import LeaderboardPage from "./pages/Leaderboard";
+import HomePage from "@/pages/home";
+import ShopPage from "@/pages/shop";
+import SocialPage from "@/pages/social";
+import EventsPage from "@/pages/events";
+import Brawlers from "@/pages/brawlers";
+import BattlePass from "@/pages/battle-pass";
 
 export default function App() {
   return (
@@ -22,13 +17,11 @@ export default function App() {
         <Route path="/social" element={<SocialPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
-
-       
+        <Route path="/battle-pass" element={<BattlePass />} />
 
         <Route path="/brawlers" element={<Brawlers />} />
         <Route path="/" element={<Navigate to="/home" replace />} />
-
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
