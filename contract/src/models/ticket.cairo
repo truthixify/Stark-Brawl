@@ -1,5 +1,4 @@
-#[derive(Copy, Drop, Serde)]
-#[dojo::model]
+#[derive(Copy, Drop, Serde, Default, Debug, PartialEq)]
 pub struct Tickets {
     #[key]
     pub player: felt252,
@@ -7,10 +6,7 @@ pub struct Tickets {
 }
 
 pub fn initialize_tickets(player: felt252) -> Tickets {
-    Tickets {
-        player,
-        amount: 0,
-    }
+    Tickets { player, amount: 0 }
 }
 
 pub trait TicketsTrait<T> {
