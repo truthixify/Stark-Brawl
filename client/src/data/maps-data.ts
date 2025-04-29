@@ -1,44 +1,65 @@
-// Define interfaces for each map type
+import {
+  Cavern,
+  Creek,
+  Echo,
+  Factory,
+  Forsaken,
+  Galactic,
+  Lunar,
+  NebulaDark,
+  Nebula,
+  Neon,
+  Quantum,
+  Shadow,
+  Solar,
+  Stadium,
+  Starlight,
+  Stellar
+} from "@/assets/maps";
+
 export interface OfficialMap {
-    featured?:boolean,
+    featured?:boolean;
     name: string;
     mode: string;
     status: string;
     likes: number | null;
-    dislikes: number | null; // Used as plays in the UI
+    dislikes: number | null;
     players: number | null;
+    image?: string;
   }
-  
+
   export interface CommunityMap {
-    featured?:boolean,
+    featured?:boolean;
     name: string;
     mode: string;
     creator?: string;
-    status?: string; // Used for "Featured" badge
+    status?: string;
     created: string;
     likes: number | null;
     dislikes: number | null;
     players: number | null;
+    image?: string;
   }
-  
+
   export interface MyMap {
     type:string;
     name: string;
     mode: string;
     published?:boolean;
-    status: string; // "Published" or "Draft"
+    status: string;
     lastEdited: string;
     likes: number | null;
     dislikes: number | null;
     players: number | null;
+    image?: string;
   }
-  
+
   export interface MapsData {
     official: OfficialMap[];
     community: CommunityMap[];
     mine: MyMap[];
   }
-  
+
   export const mapsData: MapsData = {
     official: [
       {
@@ -49,6 +70,7 @@ export interface OfficialMap {
         likes: 24680,
         dislikes: 1250000,
         players: null,
+        image: Cavern,
       },
       {
         name: "Forsaken Falls",
@@ -57,6 +79,7 @@ export interface OfficialMap {
         likes: 22450,
         dislikes: 980000,
         players: null,
+        image: Forsaken,
       },
       {
         name: "Super Stadium",
@@ -65,6 +88,7 @@ export interface OfficialMap {
         likes: null,
         dislikes: null,
         players: null,
+        image: Stadium,
       },
       {
         name: "Lunar Base",
@@ -73,6 +97,7 @@ export interface OfficialMap {
         likes: 18000,
         dislikes: 750000,
         players: null,
+        image: Lunar,
       },
       {
         name: "Starlight Plains",
@@ -81,6 +106,7 @@ export interface OfficialMap {
         likes: 19500,
         dislikes: 820000,
         players: null,
+        image: Starlight,
       },
       {
         name: "Meteor Shower",
@@ -89,6 +115,7 @@ export interface OfficialMap {
         likes: 21000,
         dislikes: 900000,
         players: null,
+        image: Solar,
       },
       {
         name: "Galactic Core",
@@ -97,6 +124,7 @@ export interface OfficialMap {
         likes: 23000,
         dislikes: 950000,
         players: null,
+        image: Galactic,
       },
     ],
     community: [
@@ -110,6 +138,7 @@ export interface OfficialMap {
         likes: 8750,
         dislikes: 1230,
         players: 45000,
+        image: Creek,
       },
       {
         name: "Gem Factory",
@@ -119,6 +148,7 @@ export interface OfficialMap {
         likes: 7650,
         dislikes: 980,
         players: 38000,
+        image: Factory,
       },
       {
         name: "Twisted Tunnels",
@@ -128,6 +158,8 @@ export interface OfficialMap {
         likes: 400,
         dislikes: 1280,
         players: 34300,
+        image: Galactic,
+
       },
       {
         name: "Frosty Peaks",
@@ -137,6 +169,7 @@ export interface OfficialMap {
         likes: 6500,
         dislikes: 850,
         players: 32000,
+        image: Stellar,
       },
       {
         name: "Echo Caverns",
@@ -146,6 +179,7 @@ export interface OfficialMap {
         likes: 7200,
         dislikes: 1100,
         players: 40000,
+        image: Echo,
       },
       {
         name: "Shadow Realm",
@@ -155,6 +189,7 @@ export interface OfficialMap {
         likes: 5800,
         dislikes: 900,
         players: 35000,
+        image: Shadow,
       },
       {
         name: "Neon Circuit",
@@ -164,6 +199,7 @@ export interface OfficialMap {
         likes: 8000,
         dislikes: 1200,
         players: 42000,
+        image: Neon,
       },
     ],
     mine: [
@@ -176,6 +212,7 @@ export interface OfficialMap {
         likes: 1250,
         dislikes: 320,
         players: 8500,
+        image: Starlight,
       },
       {
         type:"Draft",
@@ -186,6 +223,7 @@ export interface OfficialMap {
         likes: 980,
         dislikes: 210,
         players: 6200,
+        image: Lunar,
       },
       {
         type:"Draft",
@@ -196,6 +234,7 @@ export interface OfficialMap {
         likes: null,
         dislikes: null,
         players: null,
+        image: Nebula,
       },
       {
         type:"Draft",
@@ -206,6 +245,7 @@ export interface OfficialMap {
         likes: 1100,
         dislikes: 280,
         players: 7500,
+        image: Stellar,
       },
       {
         type:"Published",
@@ -217,6 +257,7 @@ export interface OfficialMap {
         likes: 1100,
         dislikes: 280,
         players: 7500,
+        image: Quantum,
       },
       {
         type:"Draft",
@@ -227,6 +268,7 @@ export interface OfficialMap {
         likes: 900,
         dislikes: 190,
         players: 5800,
+        image: Solar,
       },
       {type:"Draft",
         name: "Dark Nebula",
@@ -237,6 +279,7 @@ export interface OfficialMap {
         likes: 1100,
         dislikes: 280,
         players: 7500,
+        image: NebulaDark,
       },
     ],
   };

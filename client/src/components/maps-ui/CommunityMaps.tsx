@@ -29,7 +29,13 @@ const CommunityMaps: React.FC<CommunityMapsProps> = ({ maps }) => {
 					exit="exit"
 					className="flex flex-col md:flex-row bg-blue-600/20 p-4 rounded-lg"
 				>
-					<div className="w-full h-[200px] md:w-[250px] md:h-[260px] flex-shrink-0 bg-gray-200 rounded-lg mb-4 md:mb-0 md:mr-4" />
+					<div className="w-full h-[200px] md:w-[250px] md:h-[260px] flex-shrink-0 rounded-lg mb-4 md:mb-0 md:mr-4">
+						<img
+							src={map?.image}
+							alt=""
+							className=" object-cover h-[200px] md:h-[260px] rounded-lg"
+						/>
+					</div>
 
 					<div className=" flex flex-col justify-between w-full">
 						<div className=" flex items-start justify-between">
