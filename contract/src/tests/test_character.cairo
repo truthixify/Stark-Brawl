@@ -1,3 +1,4 @@
+use super::super::models::character::CharacterTrait;
 use stark_brawl::models::character::*;
 
 fn init_default() -> Character {
@@ -29,4 +30,15 @@ fn test_receive_damage() {
 fn test_is_alive() {
     let character = init_default();
     assert(character.is_alive(), 'INIT FAILED');
+}
+
+#[test]
+fn test_attack_target(){
+    let mut target = init_default();
+    let attacker = init_default();
+
+    target.attack_target(attacker);
+    assert(target.health == 90 , 'targert_helth_should_90');
+    target.attack_target(attacker);
+    assert(target.health == 80 , 'targert_helth_should_80');
 }

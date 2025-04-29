@@ -1,4 +1,4 @@
-#[derive(Copy, Drop, Serde, Default, Debug, Introspect, PartialEq)]
+#[derive(Copy, Drop, Serde, Default, Debug,  PartialEq)]
 pub struct Character {
     pub id: u256,
     pub name: felt252,
@@ -24,6 +24,11 @@ pub impl CharacterImpl of CharacterTrait<Character> {
         self.health = health;
     }
 
+    fn attack_target(ref self: Character, attacker: Character) {
+        assert(attacker.health != 0, 'CANNOT_ATTACK_By_DEAD_CHARACTER');
+        self.receive_damage(attacker.attack);
+    }    
+
     fn is_alive(self: @Character) -> bool {
         *self.health != 0
     }
@@ -32,4 +37,5 @@ pub impl CharacterImpl of CharacterTrait<Character> {
 pub trait CharacterTrait<T> {
     fn receive_damage(ref self: T, amount: u256);
     fn is_alive(self: @T) -> bool;
+    fn attack_target(ref self : T , attacker : Character);
 }
