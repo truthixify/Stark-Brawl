@@ -33,7 +33,7 @@ const OfficialMaps: React.FC<OfficialMapsProps> = ({ maps }) => {
 						<img
 							src={map?.image}
 							alt=""
-							className=" object-cover h-[200px] md:h-[260px] rounded-lg"
+							className=" object-cover w-full h-[200px] md:h-[260px] rounded-lg"
 						/>
 					</div>
 					<div className=" flex flex-col justify-between w-full">
