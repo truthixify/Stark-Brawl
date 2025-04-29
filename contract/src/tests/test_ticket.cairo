@@ -1,4 +1,5 @@
-use stark_brawl::models::tickets::*;
+use stark_brawl::models::ticket::*;
+use super::super::models::ticket::TicketsTrait;
 
 fn init_default_ticket() -> Tickets {
     let player = 1;
@@ -6,7 +7,7 @@ fn init_default_ticket() -> Tickets {
 
     assert(tickets.player == player, 'Player_ID_should_match');
     assert(tickets.amount == 0, 'Ticket_amount_should_0');
-    
+
     tickets
 }
 
