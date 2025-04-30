@@ -1,12 +1,14 @@
 import React from 'react';
 
-type WalletOptionProps = {
+export type WalletOptionProps = {
   name: string;
   icon: string;
   onClick: () => void;
+  isLoading?: boolean;
+  disabled?: boolean;
 };
 
-export const WalletOption: React.FC<WalletOptionProps> = ({ name, icon, onClick }) => {
+export const WalletOption: React.FC<WalletOptionProps> = ({ name, icon, onClick,  }) => {
   return (
     <button 
       onClick={onClick}
