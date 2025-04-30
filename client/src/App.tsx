@@ -8,6 +8,7 @@ import ShopPage from "@/pages/shop";
 import SocialPage from "@/pages/social";
 import EventsPage from "@/pages/events";
 import BattlePass from "@/pages/battle-pass";
+import PlayerProfile from "./components/PlayerProfile/PlayerProfile"
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/maps" element={<Maps />} />
+        <Route path="/PlayerProfile" element={<PlayerProfile />} />
 
        
         <Route path="/battle-pass" element={<BattlePass />} />
