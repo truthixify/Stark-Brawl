@@ -29,4 +29,4 @@ node_modules/
 package-lock.json
 yarn.lock
 client/package-lock.json
-.yarn-integrity
+.yarn-integrity.DS_Store
