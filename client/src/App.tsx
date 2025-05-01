@@ -7,6 +7,7 @@ import SocialPage from "@/pages/social";
 import EventsPage from "@/pages/events";
 import Brawlers from "@/pages/brawlers";
 import BattlePass from "@/pages/battle-pass";
+import ClubPage from "@/pages/club-page";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/battle-pass" element={<BattlePass />} />
+        <Route path="/club" element={<ClubPage />} />
 
         <Route path="/brawlers" element={<Brawlers />} />
         <Route path="/" element={<Navigate to="/home" replace />} />
