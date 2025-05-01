@@ -17,7 +17,6 @@ export default function ShopPage() {
   const [loading, setLoading] = useState(true)
   const [muted, setMuted] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
   const [showItemDetails, setShowItemDetails] = useState<ShopItem | null>(null)
   const [cartItems, setCartItems] = useState<ShopItem[]>([])
   const [showCart, setShowCart] = useState(false)

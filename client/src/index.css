@@ -52,6 +52,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -63,6 +64,7 @@
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -74,6 +76,7 @@
     opacity: 0;
     transform: translateX(300px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -84,16 +87,19 @@
   0% {
     width: 0%;
   }
+
   100% {
     width: 100%;
   }
 }
 
 @keyframes bounce {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -106,7 +112,6 @@ body {
     "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
 }
 
 * {
@@ -125,3 +130,40 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
+
+/* Custom scrollbar styling */
+.scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background-color: transparent;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* For Firefox */
+.scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.7) transparent;
+}
+
+.container-xyz {
+  margin-inline: 2px;
+  max-width: 900px;
+}
+
+@media screen and (min-width: 920px) {
+  .container-xyz {
+    margin-inline: auto;
+  }
+}
