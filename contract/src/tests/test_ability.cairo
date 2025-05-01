@@ -1,30 +1,50 @@
-//Unit Tests
-func test_initialize_ability() -> () {
-    let (ability) = initialize_ability(1, 'Fireball', 50);
-    assert(ability.power == 50, 'Ability power should be initialized to 50');
-    assert(ability.name == 'Fireball', 'Ability name should be Fireball');
-    return ();
-}
+use stark_brawl::models::ability::*;
 
-func test_initialize_ability_negative_power() -> () {
-    let (ability) = initialize_ability(2, 'Invalid', -10);
-    assert(ability.power > 0, 'Ability power must be positive');
-    return ();
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-func test_use_ability() -> () {
-    let (ability) = initialize_ability(1, 'Fireball', 50);
-    let target = initialize_character(2, 'Enemy', 100, 0);
-    let (target) = use_ability(ability, target);
-    assert(target.health == 50, 'Target health should be reduced by ability power');
-    return ();
-}
+    #[test]
+    fn test_ability_creation_and_validation() {
+        let ability = Ability {
+            id: 1_u256,
+            name: 'Fireball',
+            power: 50_u256,
+            cooldown: 3_u8,
+            mana_cost: 10_u8,
+            level_required: 2_u8,
+        };
 
-func test_use_ability_once_per_turn() -> () {
-    let (ability) = initialize_ability(1, 'Fireball', 50);
-    let target = initialize_character(2, 'Enemy', 100, 0);
-    let (target) = use_ability(ability, target);
-    let (target) = use_ability(ability, target); // Trying to use again in the same turn
-    assert(target.health == 50, 'Ability should only be used once per turn');
-    return ();
+        assert(ability.power == 50_u256, 'Ability power should be 50');
+        ability.validate(5_u8, 20_u8);
+    }
+
+    #[test]
+    fn test_ability_is_usable_true() {
+        let ability = Ability {
+            id: 2_u256,
+            name: 'Icebolt',
+            power: 30_u256,
+            cooldown: 1_u8,
+            mana_cost: 5_u8,
+            level_required: 1_u8,
+        };
+
+        assert(ability.is_usable(3_u8, 10_u8), 'Ability should be usable');
+    }
+
+    #[test]
+    #[should_panic(expected: 'INVALID_ABILITY_POWER')]
+    fn test_invalid_power_panics() {
+        let ability = Ability {
+            id: 3_u256,
+            name: 'Broken',
+            power: 0_u256,
+            cooldown: 2_u8,
+            mana_cost: 5_u8,
+            level_required: 1_u8,
+        };
+
+        ability.validate(5_u8, 10_u8);
+    }
 }
