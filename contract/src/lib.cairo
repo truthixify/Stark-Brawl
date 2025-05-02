@@ -9,13 +9,16 @@ pub mod models {
     pub mod ability;
     pub mod item;
     pub mod inventory;
+    pub mod player;
+    pub mod quest;
 }
 
-#[cfg(test)]
+
 pub mod tests {
 
     pub mod test_statistics;   
     pub mod test_character;
     pub mod test_ability;
     pub mod test_ticket;
+    pub mod test_item;
 }
