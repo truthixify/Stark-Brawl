@@ -1,3 +1,4 @@
+
 // Imports
 use starknet::{ContractAddress, contract_address_const};
 use core::num::traits::zero::Zero;
@@ -138,4 +139,4 @@ mod tests {
 
         assert(player.is_non_zero(), 'Should be non-zero');
     }
-}
+
