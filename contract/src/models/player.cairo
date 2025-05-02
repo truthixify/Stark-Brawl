@@ -1,23 +1,41 @@
+use core::integer::u32;
+use core::option::Option;
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
 struct Player {
-    id: felt,
-    username: felt,
-    level: felt,
-    experience: felt,
+    id: felt252,
+    username: felt252,
+    level: u32,
+    experience: u32,
 }
 
-func initialize_player(id: felt, username: felt) -> (player: Player) {
-    let player = Player(id, username, 1, 0);
-    return (player,);
+/// Initializes a new player with level 1 and 0 experience
+fn initialize_player(id: felt252, username: felt252) -> Player {
+    Player {
+        id,
+        username,
+        level: 1_u32,
+        experience: 0_u32,
+    }
 }
 
-func add_experience(player: Player, amount: felt) -> (player: Player) {
-    let new_experience = player.experience + amount;
-    let updated_player = Player(player.id, player.username, player.level, new_experience);
-    return (updated_player,);
+/// Returns the XP threshold for the given level
+fn get_experience_threshold(level: u32) -> u32 {
+    level * 100_u32
 }
 
-func level_up(player: Player) -> (player: Player) {
-    let new_level = player.level + 1;
-    let updated_player = Player(player.id, player.username, new_level, player.experience);
-    return (updated_player,);
+/// Adds XP to the player and levels up as needed
+fn add_experience(mut player: Player, amount: u32) -> Player {
+    player.experience += amount;
+
+    // Level up while experience exceeds the current threshold
+    let mut threshold = get_experience_threshold(player.level);
+    while player.experience >= threshold {
+        player.experience -= threshold;
+        player.level += 1;
+        threshold = get_experience_threshold(player.level);
+    }
+
+    player
 }
