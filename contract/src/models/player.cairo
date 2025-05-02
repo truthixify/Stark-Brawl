@@ -140,3 +140,4 @@ mod tests {
         assert(player.is_non_zero(), 'Should be non-zero');
     }
 
+}
