@@ -7,6 +7,8 @@ pub mod models {
     pub mod statistics;
     pub mod character;
     pub mod ability;
+    pub mod item;
+    pub mod inventory;
 }
 
 #[cfg(test)]

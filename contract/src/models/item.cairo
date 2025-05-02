@@ -1,23 +1,25 @@
-struct Item {
-    id: felt,
-    name: felt,
-    effect: felt,
-    is_consumable: felt,
+#[derive(Drop, Serde, Clone)] 
+#[dojo::model]
+pub struct Item {
+    #[key]  
+    pub id: u32,               
+    pub name: ByteArray,       
+    pub description: ByteArray, 
+    pub value: u16,             
 }
 
+#[generate_trait]
+pub impl ItemImpl of ItemTrait {
+    fn new(id: u32, name: ByteArray, description: ByteArray, value: u16) -> Item {
+        Item {
+            id,
+            name,
+            description,
+            value,
+        }
+    }
 
-func initialize_item(id: felt, name: felt, effect: felt) -> (item: Item) {
-    let is_consumable = 1;
-    let item = Item(id, name, effect, is_consumable);
-    return (item,);
-}
-
-
-func use_item(item: Item, target_id: felt) -> () {
-    // Placeholder logic for applying the effect to the target
-    return ();
-}
-
-func is_consumable(item: Item) -> (result: felt) {
-    return (item.is_consumable,);
+    fn update_value(ref self: Item, new_value: u16) {
+        self.value = new_value;
+    }
 }
