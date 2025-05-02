@@ -1,41 +1,142 @@
-use core::integer::u32;
-use core::option::Option;
 
-#[derive(Copy, Drop, Serde)]
+// Imports
+use starknet::{ContractAddress, contract_address_const};
+use core::num::traits::zero::Zero;
+
+
+#[derive(Copy, Drop, Serde, IntrospectPacked, Debug)]
 #[dojo::model]
-struct Player {
-    id: felt252,
-    username: felt252,
-    level: u32,
-    experience: u32,
+pub struct Player {
+    #[key]
+    pub address: ContractAddress,
+    pub level: u8,
+    pub xp: u32,
+    pub hp: u16,
+    pub max_hp: u16,
+    pub coins: u128,
+    pub starks: u128,
 }
 
-/// Initializes a new player with level 1 and 0 experience
-fn initialize_player(id: felt252, username: felt252) -> Player {
+pub fn ZERO_ADDRESS() -> ContractAddress {
+    contract_address_const::<0x0>()
+}
+
+#[generate_trait]
+pub impl PlayerImpl of PlayerTrait {
+    fn add_xp(ref self: Player, amount: u32) {
+        self.xp += amount;
+    }
+
+    fn take_damage(ref self: Player, damage: u16) {
+        if damage >= self.hp {
+            self.hp = 0;
+        } else {
+            self.hp -= damage;
+        }
+    }
+
+    fn heal(ref self: Player, amount: u16) {
+        self.hp = core::cmp::min(self.hp + amount, self.max_hp);
+    }
+}
+
+
+#[generate_trait]
+pub impl PlayerAssert of AssertTrait {
+    #[inline(always)]
+    fn assert_exists(self: Player) {
+        assert(self.is_non_zero(), 'Player: Does not exist');
+    }
+
+    #[inline(always)]
+    fn assert_not_exists(self: Player) {
+        assert(self.is_zero(), 'Player: Already exists');
+    }
+}
+
+pub impl ZeroablePlayerTrait of Zero<Player> {
+    #[inline(always)]
+    fn zero() -> Player {
+        Player {
+            address:ZERO_ADDRESS(),
+            level: 0,
+            xp: 0,
+            hp: 0,
+            max_hp: 0,
+            coins: 0,
+            starks: 0,
+        }
+    }
+
+    #[inline(always)]
+    fn is_zero(self: @Player) -> bool {
+        *self.address == ZERO_ADDRESS()
+    }
+
+    #[inline(always)]
+    fn is_non_zero(self: @Player) -> bool {
+        !self.is_zero()
+    }
+}
+
+
+pub fn spawn_player(address: ContractAddress) -> Player {
     Player {
-        id,
-        username,
-        level: 1_u32,
-        experience: 0_u32,
+        address,
+        level: 1,
+        xp: 0,
+        hp: 100,
+        max_hp: 100,
+        coins: 0,
+        starks: 0,
     }
 }
 
-/// Returns the XP threshold for the given level
-fn get_experience_threshold(level: u32) -> u32 {
-    level * 100_u32
-}
+#[cfg(test)]
+mod tests {
+    use super::{Player, ZeroablePlayerTrait};
+    use starknet::{ContractAddress, contract_address_const};
 
-/// Adds XP to the player and levels up as needed
-fn add_experience(mut player: Player, amount: u32) -> Player {
-    player.experience += amount;
+    #[test]
+    fn test_player_initialization() {
+        let addr: ContractAddress = contract_address_const::<0x123>();
 
-    // Level up while experience exceeds the current threshold
-    let mut threshold = get_experience_threshold(player.level);
-    while player.experience >= threshold {
-        player.experience -= threshold;
-        player.level += 1;
-        threshold = get_experience_threshold(player.level);
+        let player = Player {
+            address: addr,
+            level: 1,
+            xp: 0,
+            hp: 100,
+            max_hp: 100,
+            coins: 0,
+            starks: 0,
+        };
+
+        assert(player.address == addr, 'Address mismatch');
+        assert(player.level == 1, 'Invalid level');
+        assert(player.hp == 100, 'Invalid hp');
+        assert(player.coins == 0, 'Invalid coins');
     }
 
-    player
-}
+    #[test]
+    fn test_zero_player() {
+        let zero_player = ZeroablePlayerTrait::zero();
+        assert(zero_player.is_zero(), 'Should be zero');
+    }
+
+    #[test]
+    fn test_non_zero_player() {
+        let addr: ContractAddress = contract_address_const::<0xABC>();
+
+        let player = Player {
+            address: addr,
+            level: 1,
+            xp: 0,
+            hp: 100,
+            max_hp: 100,
+            coins: 0,
+            starks: 0,
+        };
+
+        assert(player.is_non_zero(), 'Should be non-zero');
+    }
+
