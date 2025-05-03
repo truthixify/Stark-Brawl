@@ -13,7 +13,6 @@ pub struct Player {
     pub xp: u32,
     pub hp: u16,
     pub max_hp: u16,
-    pub coins: u128,
     pub starks: u128,
 }
 
@@ -63,7 +62,6 @@ pub impl ZeroablePlayerTrait of Zero<Player> {
             xp: 0,
             hp: 0,
             max_hp: 0,
-            coins: 0,
             starks: 0,
         }
     }
@@ -87,7 +85,6 @@ pub fn spawn_player(address: ContractAddress) -> Player {
         xp: 0,
         hp: 100,
         max_hp: 100,
-        coins: 0,
         starks: 0,
     }
 }
@@ -107,14 +104,12 @@ mod tests {
             xp: 0,
             hp: 100,
             max_hp: 100,
-            coins: 0,
             starks: 0,
         };
 
         assert(player.address == addr, 'Address mismatch');
         assert(player.level == 1, 'Invalid level');
         assert(player.hp == 100, 'Invalid hp');
-        assert(player.coins == 0, 'Invalid coins');
     }
 
     #[test]
@@ -133,7 +128,6 @@ mod tests {
             xp: 0,
             hp: 100,
             max_hp: 100,
-            coins: 0,
             starks: 0,
         };
 
