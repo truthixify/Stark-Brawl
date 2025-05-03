@@ -19,21 +19,9 @@ pub impl ItemImpl of ItemTrait {
     }
 }
 
-#[generate_trait]
-pub impl ItemImpl of ItemTrait {
-    fn new(id: u32, name: ByteArray, description: ByteArray, value: u16) -> Item {
-        Item {
-            id,
-            name,
-            description,
-            value,
-        }
-    }
-
-
 #[cfg(test)]
 mod tests {
-    use super::ItemImpl;
+    use super::{Item, ItemImpl};
 
     #[test]
     fn test_create_item() {
@@ -99,6 +87,9 @@ mod tests {
 
         item.update_value(40);
         assert(item.value == 40, 'VAL2');
+
+    }
+
     fn update_value(ref self: Item, new_value: u16) {
         self.value = new_value;
     }
