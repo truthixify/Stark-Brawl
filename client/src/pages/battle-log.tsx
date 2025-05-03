@@ -4,7 +4,7 @@ import { fetchBattles } from "../data/battle-log-service";
 import Tabs from "../components/BattleLog/Tabs";
 import ModeFilterDropdown from "../components/BattleLog/ModeFilterDropdown";
 import BattleCard from "../components/BattleLog/BattleCard";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Swords } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -46,19 +46,27 @@ const BattleLogPage: React.FC = () => {
           <div className="text-white">Loading...</div>
         ) : (
           <div className="space-y-6">
-            <AnimatePresence mode="wait">
-              {filteredBattles.map(battle => (
-                <motion.div
-                  key={battle.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.35, ease: "easeInOut" }}
-                >
-                  <BattleCard battle={battle} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            {filteredBattles.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <Swords className="w-14 h-14 text-blue-400 mb-4" />
+                <div className="text-xl text-blue-100 font-semibold mb-2">No battles found</div>
+                <div className="text-blue-300 text-base">No battles match your filters.<br />Try adjusting your selection.</div>
+              </div>
+            ) : (
+              <AnimatePresence mode="wait">
+                {filteredBattles.map(battle => (
+                  <motion.div
+                    key={battle.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                  >
+                    <BattleCard battle={battle} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            )}
           </div>
         )}
       </div>
