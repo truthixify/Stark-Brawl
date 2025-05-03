@@ -12,6 +12,7 @@ pub mod models {
     pub mod player;
     pub mod quest;
     pub mod coins;
+    pub mod gems;
 }
 
 
