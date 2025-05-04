@@ -6,6 +6,7 @@ pub mod models {
     // pub mod character;
     // pub mod statistics;
     pub mod character;
+    pub mod team;
 }
 
 #[cfg(test)]
@@ -14,5 +15,5 @@ pub mod tests {
     // mod test_character;
     // mod test_statistics;   
     mod test_character;
-    
+    mod test_team;
 }
