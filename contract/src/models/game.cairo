@@ -1,11 +1,13 @@
+use starknet::ContractAddress;
+
 #[derive(Drop, Serde, Copy, Clone)]
 #[dojo::model]
 pub struct Game {
     #[key]
     pub id: u32,
-    pub team_ids: Span<u32>,
+    pub team_ids: Span<(ContractAddress, bool)>, // (player, is_alive)
     pub status: GameStatus,
-    pub winner_id: Option<felt252>,
+    pub winner_id: Option<ContractAddress>,
 }
 
 #[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]
@@ -17,17 +19,35 @@ pub enum GameStatus {
 
 #[generate_trait]
 pub impl GameImpl of GameTrait {
-    // The winner_id is a team? So i think that we can change the type of winer_id to Option<u32>
-    fn new(id: u32, team_ids: Span<u32>, status: GameStatus, winner_id: Option<felt252>) -> Game {
-        Game { id, team_ids, status, winner_id }
+    fn new(id: u32, team_ids: Span<(ContractAddress, bool)>) -> Game {
+        Game { id, team_ids, status: GameStatus::NotStarted, winner_id: Option::None }
     }
 
-    // TODO: Where should i get the team status, is there the `Team` model missing?
-    // Team { #[key] game_id: u32, #[key] id: u32, players: Span<ContractAddress>, is_alive: bool }
-    // So end_game logic will be some like
     fn end_game(ref self: Game) -> Game {
-        self.status = GameStatus::Finished;
-        self.winner_id = Option::Some('winner');
+        assert!(
+            self.status == GameStatus::InProgress,
+            "[end_game] - Game should be `In progress` status, current status `{}`",
+            self.status,
+        );
+        let mut teams_alive = 0;
+        let mut winner = Option::None;
+
+        for (team_id, is_alive) in self.team_ids {
+            if *is_alive {
+                teams_alive += 1;
+                winner = Option::Some(*team_id);
+            }
+        };
+
+        if teams_alive == 1 {
+            self.status = GameStatus::Finished;
+            self.winner_id = winner;
+        } else {
+            // This means that there is more than 1 team thats alive so, the game should'nt be ended
+            panic!(
+                "[end_game] - Game cannot be ended because there is {} teams alive", teams_alive,
+            );
+        }
         self
     }
 }
