@@ -1,8 +1,7 @@
-pub mod systems {
-
-}
+pub mod systems {}
 
 pub mod models {
+    pub mod game;
     pub mod ticket;
     pub mod statistics;
     pub mod character;
@@ -17,7 +16,7 @@ pub mod models {
 
 
 pub mod tests {
-    pub mod test_statistics;   
+    pub mod test_statistics;
     pub mod test_ability;
     pub mod test_item;
 }
