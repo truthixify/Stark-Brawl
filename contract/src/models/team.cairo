@@ -49,7 +49,7 @@ pub impl TeamImpl of TeamTrait<Team> {
     loop {
             if i >= self.members.len() {
             break;
-            }
+        }
             let current = *self.members.at(i);
             if current != member_id {
                 new_members.append(current);
@@ -74,13 +74,13 @@ pub impl TeamImpl of TeamTrait<Team> {
     loop {
             if i >= self.members.len() {
                 break false;
-            }
+        }
             if *self.members.at(i) == member_id {
                 break true;
-            }
-            i += 1;
         }
+            i += 1;
     }
+}
 
     fn is_alive(self: @T) -> bool {
         self.members.len() > 0

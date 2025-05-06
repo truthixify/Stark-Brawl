@@ -40,7 +40,7 @@ fn test_add_duplicate_member() {
     // Add member
     let result = team.add_member(1);
     assert(result == true, 'Should add member');
-    
+
     // Try to add same member again
     let result = team.add_member(1);
     assert(result == false, 'Should not add duplicate');
@@ -94,7 +94,7 @@ fn test_remove_nonexistent_member() {
 #[test]
 fn test_is_alive() {
     let mut team = init_default();
-    
+
     // Empty team should not be alive
     assert(!team.is_alive(), 'Empty team should not be alive');
     

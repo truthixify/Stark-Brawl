@@ -1,18 +1,29 @@
-struct Ability {
-    id: felt,
-    name: felt,
-    power: felt,
+#[derive(Copy, Drop, Serde, Debug, PartialEq)]
+#[dojo::model]
+pub struct Ability {
+    #[key]
+    pub id: u256,
+    pub name: felt252,
+    pub power: u256,
+    pub cooldown: u8,
+    pub mana_cost: u8,
+    pub level_required: u8,
 }
 
-func initialize_ability(id: felt, name: felt, power: felt) -> (ability: Ability) {
-    assert(power > 0, 'Ability power must be positive');
-    let ability = Ability(id, name, power);
-    return (ability,);
+pub trait AbilityTrait<T, +Serde<T>, +Drop<T>> {
+    fn is_usable(self: @T, user_level: u8, user_mana: u8) -> bool;
+    fn validate(self: @T, user_level: u8, user_mana: u8);
 }
 
-func use_ability(ability: Ability, target: Character) -> (target: Character) {
-    assert(target.last_ability_used != ability.id, 'Ability can only be used once per turn');
-    let new_health = target.health - ability.power;
-    let updated_target = Character(target.id, target.name, new_health, ability.id);
-    return (updated_target,);
+impl AbilityImpl of AbilityTrait<Ability> {
+    fn is_usable(self: @Ability, user_level: u8, user_mana: u8) -> bool {
+        user_level >= *self.level_required && user_mana >= *self.mana_cost
+    }
+    
+    fn validate(self: @Ability, user_level: u8, user_mana: u8) {
+        assert(*self.power > 0_u256, 'INVALID_ABILITY_POWER');
+        assert(*self.cooldown < 10_u8, 'INVALID_ABILITY_COOLDOWN');
+        assert(user_level >= *self.level_required, 'LEVEL_TOO_LOW');
+        assert(user_mana >= *self.mana_cost, 'NOT_ENOUGH_MANA');
+    }
 }
