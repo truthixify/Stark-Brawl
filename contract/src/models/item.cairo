@@ -10,10 +10,13 @@ pub struct Item {
 
 #[generate_trait]
 pub impl ItemImpl of ItemTrait {
+    
+    #[inline(always)]
     fn new(id: u32, name: ByteArray, description: ByteArray, value: u16) -> Item {
         Item { id, name, description, value, }
     }
 
+    #[inline(always)]
     fn update_value(ref self: Item, new_value: u16) {
         self.value = new_value;
     }

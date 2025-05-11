@@ -1,88 +1,74 @@
-#[derive(Copy, Drop, Serde, Default, Debug, PartialEq)]
+use starknet::{ContractAddress, contract_address_const};
+use core::num::traits::zero::Zero;
+
+#[derive(Copy, Drop, Serde, IntrospectPacked, Debug, PartialEq)]
+#[dojo::model]
 pub struct Team {
     #[key]
-    pub id: felt252,
-    pub members: Array<felt252>,
+    pub id: ContractAddress,
     pub max_size: u8,
 }
 
-pub fn initialize_team(id: felt252, max_size: u8) -> Team {
-    assert(max_size > 0, 'Max size must be positive');
-    Team { 
-        id,
-        members: ArrayTrait::new(),
-        max_size,
+pub mod errors {
+    pub const TEAM_FULL: felt252 = 'Team: Max size reached';
+}
+
+#[generate_trait]
+pub impl TeamImpl of TeamTrait {
+    #[inline(always)]
+    fn is_full(self: @Team, member_count: u8) -> bool {
+        member_count >= *self.max_size
     }
 }
 
-pub trait TeamTrait<T> {
-    fn add_member(ref self: T, member_id: felt252) -> bool;
-    fn remove_member(ref self: T, member_id: felt252) -> bool;
-    fn is_full(self: @T) -> bool;
-    fn has_member(self: @T, member_id: felt252) -> bool;
-    fn is_alive(self: @T) -> bool;
-}
-
-pub impl TeamImpl of TeamTrait<Team> {
-    fn add_member(ref self: Team, member_id: felt252) -> bool {
-        // Check if team is full
-        if self.is_full() {
-            return false;
+pub impl ZeroableTeamTrait of Zero<Team> {
+    #[inline(always)]
+    fn zero() -> Team {
+        Team {
+            id: contract_address_const::<0>(),
+            max_size: 0,
         }
-
-        // Check for duplicates
-        if self.has_member(member_id) {
-            return false;
-        }
-
-        // Add member
-        self.members.append(member_id);
-        true
     }
 
-    fn remove_member(ref self: Team, member_id: felt252) -> bool {
-        let mut found = false;
-        let mut new_members = ArrayTrait::new();
-
-        // Copy all members except the one to remove
-        let mut i = 0;
-    loop {
-            if i >= self.members.len() {
-            break;
-        }
-            let current = *self.members.at(i);
-            if current != member_id {
-                new_members.append(current);
-            } else {
-                found = true;
-            }
-            i += 1;
-        };
-
-        if found {
-            self.members = new_members;
-        }
-        found
+    #[inline(always)]
+    fn is_zero(self: @Team) -> bool {
+        *self.max_size == 0
     }
 
-    fn is_full(self: @T) -> bool {
-        self.members.len() >= (*self.max_size).into()
-    }
-
-    fn has_member(self: @T, member_id: felt252) -> bool {
-    let mut i = 0;
-    loop {
-            if i >= self.members.len() {
-                break false;
-        }
-            if *self.members.at(i) == member_id {
-                break true;
-        }
-            i += 1;
+    #[inline(always)]
+    fn is_non_zero(self: @Team) -> bool {
+        !Self::is_zero(self)
     }
 }
 
-    fn is_alive(self: @T) -> bool {
-        self.members.len() > 0
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use starknet::contract_address_const;
+
+    fn sample_team() -> Team {
+        Team {
+            id: contract_address_const::<0xAAA>(),
+            max_size: 3,
+        }
+    }
+
+    #[test]
+    fn test_is_full_true() {
+        let team = sample_team();
+        assert(TeamImpl::is_full(@team, 3), 'Should be full');
+    }
+
+    #[test]
+    fn test_is_full_false() {
+        let team = sample_team();
+        assert(!TeamImpl::is_full(@team, 2), 'Should not be full');
+    }
+
+    #[test]
+    fn test_zero_team() {
+        let team = ZeroableTeamTrait::zero();
+        assert(ZeroableTeamTrait::is_zero(@team), 'Zero team check');
+        assert(!ZeroableTeamTrait::is_non_zero(@team), 'Non-zero team check');
     }
 }
