@@ -4,11 +4,7 @@ version = 1
 [[package]]
 name = "dojo"
 version = "1.4.0"
-<<<<<<< HEAD
-source = "git+https://github.com/dojoengine/dojo?rev=22ef7101e84429f4f06fa634f927dd6ad2c48752#22ef7101e84429f4f06fa634f927dd6ad2c48752"
-=======
 source = "git+https://github.com/dojoengine/dojo.git?tag=v1.4.0#22ef7101e84429f4f06fa634f927dd6ad2c48752"
->>>>>>> origin/main
 dependencies = [
  "dojo_plugin",
 ]
@@ -16,11 +12,7 @@ dependencies = [
 [[package]]
 name = "dojo_cairo_test"
 version = "1.0.12"
-<<<<<<< HEAD
-source = "git+https://github.com/dojoengine/dojo?rev=22ef7101e84429f4f06fa634f927dd6ad2c48752#22ef7101e84429f4f06fa634f927dd6ad2c48752"
-=======
 source = "git+https://github.com/dojoengine/dojo.git?tag=v1.4.0#22ef7101e84429f4f06fa634f927dd6ad2c48752"
->>>>>>> origin/main
 dependencies = [
  "dojo",
 ]
@@ -28,9 +20,6 @@ dependencies = [
 [[package]]
 name = "dojo_plugin"
 version = "2.9.4"
-<<<<<<< HEAD
-source = "git+https://github.com/dojoengine/dojo?rev=22ef7101e84429f4f06fa634f927dd6ad2c48752#22ef7101e84429f4f06fa634f927dd6ad2c48752"
-=======
 source = "git+https://github.com/dojoengine/dojo.git?tag=v1.4.0#22ef7101e84429f4f06fa634f927dd6ad2c48752"
 
 [[package]]
@@ -71,7 +60,6 @@ dependencies = [
 name = "openzeppelin_utils"
 version = "1.0.0"
 source = "git+https://github.com/openzeppelin/cairo-contracts?tag=v1.0.0#755ce1adbf8d89ed23fbb8daa328fcbeab7c6424"
->>>>>>> origin/main
 
 [[package]]
 name = "stark_brawl"

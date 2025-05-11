@@ -16,14 +16,16 @@ pub trait LeaderboardSystem {
 }
 
 pub impl LeaderboardImpl of LeaderboardSystem {
+    #[inline(always)]
     fn kdr(self: @LeaderboardEntry) -> u32 {
         if *self.deaths == 0_u32 {
-            1000_u32 
+            1000_u32
         } else {
             (*self.kills * 1000_u32) / *self.deaths
         }
     }
 
+    #[inline(always)]
     fn is_valid(self: @LeaderboardEntry) -> bool {
         *self.kills <= 1000_u32 && *self.deaths <= 1000_u32
     }
@@ -41,9 +43,8 @@ mod tests {
             kills: 10_u32,
             deaths: 2_u32,
         };
-
-        assert(entry.kdr() == 5000_u32, 1); 
-        assert(entry.is_valid(), 2);        
+        assert(entry.kdr() == 5000_u32, 1);
+        assert(entry.is_valid(), 2);
     }
 
     #[test]
@@ -53,8 +54,7 @@ mod tests {
             kills: 25_u32,
             deaths: 0_u32,
         };
-
-        assert(entry.kdr() == 1000_u32, 3); 
+        assert(entry.kdr() == 1000_u32, 3);
     }
 
     #[test]
@@ -64,8 +64,7 @@ mod tests {
             kills: 100_u32,
             deaths: 1_u32,
         };
-
-        assert(entry.kdr() == 100_000_u32, 4); 
+        assert(entry.kdr() == 100000_u32, 4);
     }
 
     #[test]
@@ -75,8 +74,7 @@ mod tests {
             kills: 1001_u32,
             deaths: 10_u32,
         };
-
-        assert(!entry.is_valid(), 5); 
+        assert(!entry.is_valid(), 5);
     }
 
     #[test]
@@ -86,8 +84,7 @@ mod tests {
             kills: 100_u32,
             deaths: 1001_u32,
         };
-
-        assert(!entry.is_valid(), 6); 
+        assert(!entry.is_valid(), 6);
     }
 
     #[test]
@@ -97,8 +94,7 @@ mod tests {
             kills: 1000_u32,
             deaths: 1000_u32,
         };
-
-        assert(entry.is_valid(), 7); 
-        assert(entry.kdr() == 1000_u32, 8); 
-    }
+        assert(entry.is_valid(), 7);
+        assert(entry.kdr() == 1000_u32, 8);
+    }
 }
