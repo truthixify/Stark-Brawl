@@ -7,7 +7,7 @@ pub trait IBrawlGame<T> {
     fn get_player_status(ref self: T) -> PlayerStatus;
 }
 
-// Contrato
+// Contract
 #[dojo::contract]
 pub mod brawl_game {
     use super::IBrawlGame;
@@ -44,7 +44,6 @@ pub mod brawl_game {
             store.register_player(caller);
             store.assign_to_match(caller, self.match_counter.read());
 
-            // lógica para incrementar contador
         }
 
         fn use_ability(ref self: ContractState, ability_id: u32, target_id: ContractAddress) {
