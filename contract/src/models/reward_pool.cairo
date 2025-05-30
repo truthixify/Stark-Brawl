@@ -56,4 +56,36 @@ pub mod reward_pool {
             true
         }
     }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_create_reward() {
+            let mut contract = reward_pool::ContractState::default();
+
+            let reward = reward_pool::RewardPoolImpl::create_reward(ref contract, 100, 5, 42);
+            assert(reward.coins == 100, 'Coins set');
+            assert(reward.gems == 5, 'Gems set');
+            assert(reward.items == 42, 'Items set');
+            assert(!reward.claimed, 'Not claimed yet');
+        }
+
+        #[test]
+        fn test_claim_reward() {
+            let mut contract = reward_pool::ContractState::default();
+
+            // Create a reward first
+            let _ = reward_pool::RewardPoolImpl::create_reward(ref contract, 100, 5, 42);
+
+            // Claim the reward
+            let claimed = reward_pool::RewardPoolImpl::claim_reward(ref contract, 0);
+            assert(claimed, 'Claimed first time');
+
+            // Try to claim again
+            let claimed_again = reward_pool::RewardPoolImpl::claim_reward(ref contract, 0);
+            assert(!claimed_again, 'Cannot claim twice');
+        }
+    }
 }
