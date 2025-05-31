@@ -14,6 +14,7 @@ pub mod models {
     pub mod quest;
     pub mod coins;
     pub mod gems;
+    pub mod trap;
 }
 
 
@@ -26,4 +27,5 @@ pub mod tests {
     pub mod test_statistics;   
     pub mod test_ability;
     pub mod test_item;
+    pub mod test_trap;
 }
