@@ -1,8 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use dojo_starter::models::trap::{Trap, TrapTrait, TrapType, create_trap, ZeroableTrapTrait};
+    use stark_brawl::models::trap::{Trap, TrapTrait, TrapType, Position, create_trap, ZeroableTrapTrait};
     use starknet::{ContractAddress, contract_address_const};
-    use dojo_starter::models::Vec2;
 
     fn get_test_owner() -> ContractAddress {
         contract_address_const::<0x12345>()
@@ -29,7 +28,7 @@ mod tests {
         let trap = create_trap(1, owner, 10, 10, 3, 50, TrapType::Explosive);
         
         // Enemy at same position as trap
-        let enemy_pos = Vec2 { x: 10, y: 10 };
+        let enemy_pos = Position { x: 10, y: 10 };
         assert(trap.check_trigger(enemy_pos), 'Should trigger at same position');
     }
 
@@ -40,10 +39,10 @@ mod tests {
         
         // Test multiple positions within radius
         let positions_within_radius = array![
-            Vec2 { x: 16, y: 21 }, // Distance = 2
-            Vec2 { x: 18, y: 20 }, // Distance = 3
-            Vec2 { x: 15, y: 24 }, // Distance = 4
-            Vec2 { x: 11, y: 20 }, // Distance = 4
+            Position { x: 16, y: 21 }, // Distance = 2
+            Position { x: 18, y: 20 }, // Distance = 3
+            Position { x: 15, y: 24 }, // Distance = 4
+            Position { x: 11, y: 20 }, // Distance = 4
         ];
 
         let mut i = 0;
@@ -64,10 +63,10 @@ mod tests {
         
         // Test positions outside radius
         let positions_outside_radius = array![
-            Vec2 { x: 13, y: 11 }, // Distance = 4
-            Vec2 { x: 5, y: 10 },  // Distance = 5
-            Vec2 { x: 10, y: 15 }, // Distance = 5
-            Vec2 { x: 15, y: 15 }, // Distance = 10
+            Position { x: 13, y: 11 }, // Distance = 4
+            Position { x: 5, y: 10 },  // Distance = 5
+            Position { x: 10, y: 15 }, // Distance = 5
+            Position { x: 15, y: 15 }, // Distance = 10
         ];
 
         let mut i = 0;
@@ -87,7 +86,7 @@ mod tests {
         let mut trap = create_trap(4, owner, 8, 12, 3, 60, TrapType::Explosive);
         
         // Enemy approaches the trap
-        let enemy_pos = Vec2 { x: 10, y: 12 }; // Distance = 2, within radius
+        let enemy_pos = Position { x: 10, y: 12 }; // Distance = 2, within radius
         
         // Check if trap would trigger
         assert(trap.check_trigger(enemy_pos), 'Trap should detect enemy');
@@ -110,7 +109,7 @@ mod tests {
         let mut trap = create_trap(5, owner, 0, 0, 5, 25, TrapType::Poison);
         
         // First enemy triggers trap
-        let enemy1_pos = Vec2 { x: 2, y: 3 }; // Distance = 5, at edge
+        let enemy1_pos = Position { x: 2, y: 3 }; // Distance = 5, at edge
         assert(trap.check_trigger(enemy1_pos), 'First enemy should trigger');
         
         let damage1 = trap.trigger();
@@ -118,7 +117,7 @@ mod tests {
         assert(!trap.is_active, 'Trap consumed after first trigger');
         
         // Second enemy cannot trigger the same trap
-        let enemy2_pos = Vec2 { x: 1, y: 1 }; // Distance = 2, well within radius
+        let enemy2_pos = Position { x: 1, y: 1 }; // Distance = 2, well within radius
         assert(!trap.check_trigger(enemy2_pos), 'Second enemy should not trigger consumed trap');
         
         let damage2 = trap.trigger();
@@ -135,7 +134,7 @@ mod tests {
         let mut electric_trap = create_trap(12, owner, 20, 20, 2, 45, TrapType::Electric);
         let mut freezing_trap = create_trap(13, owner, 30, 30, 5, 15, TrapType::Freezing);
         
-        let enemy_pos = Vec2 { x: 1, y: 1 };
+        let enemy_pos = Position { x: 1, y: 1 };
         
         // Test explosive trap
         assert(explosive_trap.check_trigger(enemy_pos), 'Enemy should trigger explosive');
@@ -143,19 +142,19 @@ mod tests {
         assert(explosive_damage == 80, 'Explosive should deal 80 damage');
         
         // Test poison trap (enemy at different position)
-        let poison_enemy_pos = Vec2 { x: 12, y: 13 };
+        let poison_enemy_pos = Position { x: 12, y: 13 };
         assert(poison_trap.check_trigger(poison_enemy_pos), 'Enemy should trigger poison');
         let poison_damage = poison_trap.trigger();
         assert(poison_damage == 20, 'Poison should deal 20 damage');
         
         // Test electric trap
-        let electric_enemy_pos = Vec2 { x: 21, y: 20 };
+        let electric_enemy_pos = Position { x: 21, y: 20 };
         assert(electric_trap.check_trigger(electric_enemy_pos), 'Enemy should trigger electric');
         let electric_damage = electric_trap.trigger();
         assert(electric_damage == 45, 'Electric should deal 45 damage');
         
         // Test freezing trap
-        let freezing_enemy_pos = Vec2 { x: 33, y: 32 };
+        let freezing_enemy_pos = Position { x: 33, y: 32 };
         assert(freezing_trap.check_trigger(freezing_enemy_pos), 'Enemy should trigger freezing');
         let freezing_damage = freezing_trap.trigger();
         assert(freezing_damage == 15, 'Freezing should deal 15 damage');
@@ -173,7 +172,7 @@ mod tests {
         assert(!trap.is_active, 'Trap should be inactive');
         
         // Enemy should not trigger inactive trap
-        let enemy_pos = Vec2 { x: 5, y: 5 };
+        let enemy_pos = Position { x: 5, y: 5 };
         assert(!trap.check_trigger(enemy_pos), 'Inactive trap should not trigger');
         
         // Reactivate trap
@@ -188,15 +187,15 @@ mod tests {
         
         // Test trap with zero radius
         let zero_radius_trap = create_trap(7, owner, 10, 10, 0, 50, TrapType::Explosive);
-        let enemy_at_trap = Vec2 { x: 10, y: 10 };
-        let enemy_adjacent = Vec2 { x: 11, y: 10 };
+        let enemy_at_trap = Position { x: 10, y: 10 };
+        let enemy_adjacent = Position { x: 11, y: 10 };
         
         assert(zero_radius_trap.check_trigger(enemy_at_trap), 'Should trigger at exact position');
         assert(!zero_radius_trap.check_trigger(enemy_adjacent), 'Should not trigger adjacent with zero radius');
         
         // Test trap with very large radius
         let large_radius_trap = create_trap(8, owner, 0, 0, 100, 10, TrapType::Poison);
-        let far_enemy = Vec2 { x: 50, y: 49 }; // Distance = 99
+        let far_enemy = Position { x: 50, y: 49 }; // Distance = 99
         assert(large_radius_trap.check_trigger(far_enemy), 'Should trigger with large radius');
     }
 
@@ -207,12 +206,12 @@ mod tests {
         
         // Test Manhattan distance calculation
         let test_cases = array![
-            (Vec2 { x: 15, y: 10 }, true),  // Distance = 5 (exactly at radius)
-            (Vec2 { x: 10, y: 15 }, true),  // Distance = 5 (exactly at radius)
-            (Vec2 { x: 13, y: 12 }, true),  // Distance = 5 (3+2)
-            (Vec2 { x: 16, y: 10 }, false), // Distance = 6 (outside radius)
-            (Vec2 { x: 10, y: 16 }, false), // Distance = 6 (outside radius)
-            (Vec2 { x: 5, y: 5 }, false),   // Distance = 10 (outside radius)
+            (Position { x: 15, y: 10 }, true),  // Distance = 5 (exactly at radius)
+            (Position { x: 10, y: 15 }, true),  // Distance = 5 (exactly at radius)
+            (Position { x: 13, y: 12 }, true),  // Distance = 5 (3+2)
+            (Position { x: 16, y: 10 }, false), // Distance = 6 (outside radius)
+            (Position { x: 10, y: 16 }, false), // Distance = 6 (outside radius)
+            (Position { x: 5, y: 5 }, false),   // Distance = 10 (outside radius)
         ];
 
         let mut i = 0;

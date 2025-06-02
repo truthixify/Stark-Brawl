@@ -1,6 +1,12 @@
-use starknet::{ContractAddress, contract_address_const};
+use starknet::ContractAddress;
 use core::num::traits::zero::Zero;
-use dojo_starter::models::{Vec2, Vec2Trait};
+
+// Position structure for trap placement
+#[derive(Copy, Drop, Serde, IntrospectPacked, Debug, PartialEq)]
+pub struct Position {
+    pub x: u32,
+    pub y: u32,
+}
 
 #[derive(Copy, Drop, Serde, IntrospectPacked, Debug)]
 #[dojo::model]
@@ -8,7 +14,7 @@ pub struct Trap {
     #[key]
     pub trap_id: u32,
     pub owner: ContractAddress,
-    pub position: Vec2,
+    pub position: Position,
     pub trigger_radius: u32,
     pub damage: u16,
     pub trap_type: TrapType,
@@ -23,13 +29,9 @@ pub enum TrapType {
     Freezing,
 }
 
-pub fn ZERO_ADDRESS() -> ContractAddress {
-    contract_address_const::<0x0>()
-}
-
 #[generate_trait]
 pub impl TrapImpl of TrapTrait {
-    fn check_trigger(self: @Trap, enemy_pos: Vec2) -> bool {
+    fn check_trigger(self: @Trap, enemy_pos: Position) -> bool {
         if !*self.is_active {
             return false;
         }
@@ -97,8 +99,8 @@ pub impl ZeroableTrapTrait of Zero<Trap> {
     fn zero() -> Trap {
         Trap {
             trap_id: 0,
-            owner: ZERO_ADDRESS(),
-            position: Vec2 { x: 0, y: 0 },
+            owner: starknet::contract_address_const::<0x0>(),
+            position: Position { x: 0, y: 0 },
             trigger_radius: 0,
             damage: 0,
             trap_type: TrapType::Explosive,
@@ -108,7 +110,7 @@ pub impl ZeroableTrapTrait of Zero<Trap> {
 
     #[inline(always)]
     fn is_zero(self: @Trap) -> bool {
-        *self.owner == ZERO_ADDRESS() && *self.trap_id == 0
+        *self.owner == starknet::contract_address_const::<0x0>() && *self.trap_id == 0
     }
 
     #[inline(always)]
@@ -129,7 +131,7 @@ pub fn create_trap(
     Trap {
         trap_id,
         owner,
-        position: Vec2 { x, y },
+        position: Position { x, y },
         trigger_radius,
         damage,
         trap_type,
@@ -150,9 +152,8 @@ impl TrapTypeIntoFelt252 of Into<TrapType, felt252> {
 
 #[cfg(test)]
 mod tests {
-    use super::{Trap, TrapTrait, TrapType, create_trap, ZeroableTrapTrait};
+    use super::{Trap, TrapTrait, TrapType, Position, create_trap, ZeroableTrapTrait};
     use starknet::{ContractAddress, contract_address_const};
-    use dojo_starter::models::Vec2;
 
     #[test]
     fn test_trap_creation() {
@@ -184,7 +185,7 @@ mod tests {
         let trap = create_trap(1, owner, 10, 10, 3, 50, TrapType::Explosive);
         
         // Enemy at position (12, 11) - within radius of 3
-        let enemy_pos = Vec2 { x: 12, y: 11 };
+        let enemy_pos = Position { x: 12, y: 11 };
         assert(trap.check_trigger(enemy_pos), 'Should trigger within radius');
     }
 
@@ -194,7 +195,7 @@ mod tests {
         let trap = create_trap(1, owner, 10, 10, 3, 50, TrapType::Explosive);
         
         // Enemy at position (15, 15) - outside radius of 3
-        let enemy_pos = Vec2 { x: 15, y: 15 };
+        let enemy_pos = Position { x: 15, y: 15 };
         assert(!trap.check_trigger(enemy_pos), 'Should not trigger outside radius');
     }
 
@@ -204,7 +205,7 @@ mod tests {
         let trap = create_trap(1, owner, 10, 10, 3, 50, TrapType::Explosive);
         
         // Enemy at position (13, 10) - exactly at radius of 3
-        let enemy_pos = Vec2 { x: 13, y: 10 };
+        let enemy_pos = Position { x: 13, y: 10 };
         assert(trap.check_trigger(enemy_pos), 'Should trigger at exact radius');
     }
 
@@ -234,7 +235,7 @@ mod tests {
         let mut trap = create_trap(1, owner, 10, 10, 3, 50, TrapType::Explosive);
         trap.deactivate();
         
-        let enemy_pos = Vec2 { x: 10, y: 10 }; // Same position as trap
+        let enemy_pos = Position { x: 10, y: 10 }; // Same position as trap
         assert(!trap.check_trigger(enemy_pos), 'Inactive trap should not trigger');
     }
 
