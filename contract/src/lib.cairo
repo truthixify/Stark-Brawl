@@ -1,4 +1,6 @@
-pub mod systems {}
+pub mod systems {
+
+}
 
 pub mod models {
     pub mod game;
@@ -15,9 +17,10 @@ pub mod models {
     pub mod brawler;
     pub mod coins;
     pub mod gems;
+    pub mod trap;
 }
-
 
 pub mod tests {
-    
+    pub mod test_trap;
 }
+
