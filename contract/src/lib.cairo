@@ -19,6 +19,7 @@ pub mod models {
     pub mod gems;
     pub mod trap;
     pub mod tower; 
+    pub mod enemy;
 }
 
 pub mod tests {
