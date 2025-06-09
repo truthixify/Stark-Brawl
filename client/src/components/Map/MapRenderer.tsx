@@ -1,50 +1,30 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
-interface MapRendererProps {
-  src: string;
-}
-
-export default function MapRenderer({ src }: MapRendererProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mapImage = useRef<HTMLImageElement>(new Image());
-  const [dimensions, setDimensions] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+export default function MapRenderer({ src }: { src: string }) {
+  const mapRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const handleResize = () => {
-      setDimensions({ width: window.innerWidth, height: window.innerHeight });
+    const context = mapRef.current?.getContext("2d");
+    const image = new Image();
+    image.src = src;
+    image.onload = () => {
+      context?.clearRect(0, 0, mapRef.current!.width, mapRef.current!.height);
+      context?.drawImage(
+        image,
+        0,
+        0,
+        mapRef.current!.width,
+        mapRef.current!.height
+      );
     };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-
-    if (!canvas || !context) return;
-
-    mapImage.current.src = src;
-    mapImage.current.onload = () => {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(mapImage.current, 0, 0, canvas.width, canvas.height);
-    };
-    mapImage.current.onerror = () => {
-      console.error(`Failed to load map image: ${src}`);
-    };
-  }, [src, dimensions]);
+  }, [src]);
 
   return (
-    <>
-      <canvas
-        ref={canvasRef}
-        width={dimensions.width}
-        height={dimensions.height}
-        className="absolute pointer-events-none"
-      />
-    </>
+    <canvas
+      ref={mapRef}
+      width={window.innerWidth}
+      height={window.innerHeight}
+      className="absolute top-0 left-0 z-0 pointer-events-none"
+    />
   );
 }

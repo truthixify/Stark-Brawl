@@ -3,6 +3,7 @@ import { Enemy } from '@/logic/class/Enemy'
 export class EnemyController {
     private enemy: Enemy;
     private speed: number;
+    private velocity = { x: 0, y: 0 };
 
     constructor(enemy: Enemy, speed: number) {
         this.enemy = enemy;
@@ -10,40 +11,65 @@ export class EnemyController {
     }
 
     public move(direction: { x: number; y: number }) {
-        const currentPosition = this.enemy.getPosition();
+        this.velocity = direction;
+        const current = this.enemy.getPosition();
         const newPosition = {
-            x: currentPosition.x + direction.x * this.speed,
-            y: currentPosition.y + direction.y * this.speed,
+            x: current.x + direction.x * this.speed,
+            y: current.y + direction.y * this.speed,
         }
         this.enemy.setPosition(newPosition);
-        this.enemy.playAnimation('walk');
+        this.update();
+    }
+
+    public update() {
+        const { x, y } = this.velocity;
+        if ( x === 0 && y === 0) {
+            this.enemy.setState('idle');
+        } else if (Math.abs(x) + Math.abs(y) > 0.5) {
+            this.enemy.setState('run');
+        } else {
+            this.enemy.setState('walk');
+        }
     }
 
     public attack() {
-        this.enemy.playAnimation('attack');
-    }
-
-    public die() {
-        this.enemy.playAnimation('die');
+        this.enemy.setState('attack');
+        this.stop();
     }
 
     public hurt() {
-        this.enemy.playAnimation('hurt');
+        this.enemy.setState('hurt');
+        this.stop();
     }
 
-    public idle() {
-        this.enemy.playAnimation('idle');
+    public die() {
+        this.enemy.setState('die');
+        this.stop();
     }
 
     public jump() {
-        this.enemy.playAnimation('jump');
+        this.enemy.setState('jump');
+        this.stop();
+    }
+
+    public idle() {
+        this.enemy.setState('idle');
+        this.stop();
     }
 
     public run() {
-        this.enemy.playAnimation('run');
+        this.enemy.setState('run');
     }
 
-    public getPosition(): { x: number; y: number } {
+    private stop() {
+        this.velocity = { x: 0, y: 0 };
+    }
+
+    public getPosition() {
         return this.enemy.getPosition();
+    }
+
+    public getState() {
+        return this.enemy.getState();
     }
 }

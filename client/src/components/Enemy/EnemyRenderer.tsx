@@ -1,128 +1,141 @@
 import { useRef, useEffect, useState } from "react";
-import { Enemy } from "@/logic/class/Enemy";
-import { EnemyController } from "@/logic/controllers/EnemyController"
+import { useGame } from "../contexts/GameContext";
 import { enemySprites } from "@/data/enemySprites";
-
-interface EnemyRenderProps {
-  enemyId: number
-  initialX: number;
-  initialY: number;
-}
+import { Enemy } from "@/logic/class/Enemy";
+import { EnemyController } from "@/logic/controllers/EnemyController";
 
 export default function EnemyRenderer({
   enemyId,
   initialX,
   initialY,
-}: EnemyRenderProps) {
+}: {
+  enemyId: number;
+  initialX: number;
+  initialY: number;
+}) {
   const enemyRef = useRef<HTMLCanvasElement>(null);
-  const [frames, setFrames] = useState<HTMLImageElement[]>([]);
   const currentFrame = useRef(0);
-  const [position, setPosition] = useState({ x: initialX, y: initialY });
-  const enemy = new Enemy({ x: initialX, y: initialY });
-  const controller = new EnemyController(enemy, 5);
-  const enemyData = enemySprites.find((sprite) => sprite.id === enemyId);
-  const currentAnimation = enemyData?.animations.idle;
+  const { tileSize } = useGame();
+
+  const enemyInstance = useRef(new Enemy({ x: initialX, y: initialY }));
+  const controller = useRef(new EnemyController(enemyInstance.current, 0.05));
+  const enemyData = enemySprites.find((s) => s.id === enemyId);
+
+  const [frames, setFrames] = useState<HTMLImageElement[]>([]);
+  const [currentAnimation, setCurrentAnimation] = useState("idle");
 
   useEffect(() => {
-    if(!currentAnimation) return;
-    const loadImage: HTMLImageElement[] = [];
-    let loadCount = 0;
-
-    for (let i = 0; i < currentAnimation.frameCount; i++) {
-      const numberImage = String(i).padStart(3, "0");
-      const image = new Image();
-      image.src = `${currentAnimation.src}_${numberImage}.png`;
-
-      image.onload = () => {
-        loadCount++;
-        if (loadCount === currentAnimation.frameCount) {
-          setFrames(loadImage);
-        }
-      };
-      image.onerror = () => {
-        console.error(`Failed to load image: ${image.src}`);
-      };
-      loadImage.push(image);
-    }
-  }, [currentAnimation]);
+    const interval = setInterval(() => {
+      const state = controller.current.getState();
+      setCurrentAnimation((prev) => (prev !== state ? state : prev));
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
-    if (frames.length === 0 || !currentAnimation) return;
+    const animation = enemyData?.animations[currentAnimation];
+    if (!animation) return;
 
-    const canvas = enemyRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
+    const loadFrames = async () => {
+      const loaded: HTMLImageElement[] = [];
+      for (let i = 0; i < animation.frameCount; i++) {
+        const image = new Image();
+        image.src = `${animation.src}_${String(i).padStart(3, "0")}.png`;
+        await new Promise((res) => {
+          image.onload = res;
+          image.onerror = () => console.error(`No se pudo cargar ${image.src}`);
+        });
+        loaded.push(image);
+      }
+      setFrames(loaded);
+      currentFrame.current = 0;
+    };
+    loadFrames();
+  }, [enemyData, currentAnimation]);
 
-    let animationId: number;
+  useEffect(() => {
+    if (!enemyRef.current || frames.length === 0) return;
+    const context = enemyRef.current.getContext("2d");
+    const animation = enemyData?.animations[currentAnimation];
+    if (!context || !animation) return;
+
+    let animationId = 0;
     let lastTime = 0;
 
     const render = (time: number) => {
-      if (time - lastTime > 1000 / currentAnimation.fps) {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(frames[currentFrame.current], position.x, position.y, currentAnimation.width, currentAnimation.height);
+      if (!context || !enemyRef.current) return;
+
+      if (time - lastTime > 1000 / animation.fps) {
+        const currentPosition = controller.current.getPosition();
+        context.clearRect(
+          0,
+          0,
+          enemyRef.current.width,
+          enemyRef.current.height
+        );
+        context.drawImage(
+          frames[currentFrame.current],
+          currentPosition.x * tileSize,
+          currentPosition.y * tileSize,
+          animation.width,
+          animation.height
+        );
         currentFrame.current = (currentFrame.current + 1) % frames.length;
         lastTime = time;
       }
       animationId = requestAnimationFrame(render);
     };
-    animationId = requestAnimationFrame(render);
+    render(0);
     return () => cancelAnimationFrame(animationId);
-  }, [frames, position, currentAnimation]);
+  }, [frames, currentAnimation, enemyData, tileSize]);
 
   useEffect(() => {
-    const handleKey = (event: KeyboardEvent) => {
-      switch (event.key) {
-        case 'ArrowUp':
-          controller.move({ x: 0, y: -1 });
+    const handleKey = (e: KeyboardEvent) => {
+      let moved = false;
+      switch (e.key) {
+        case "ArrowRight":
+          controller.current.move({ x: 1, y: 0 });
+          moved = true;
           break;
-        case 'ArrowDown':
-          controller.move({ x: 0, y: 1 });
+        case "ArrowLeft":
+          controller.current.move({ x: -1, y: 0 });
+          moved = true;
           break;
-        case 'ArrowLeft':
-          controller.move({ x: -1, y: 0 });
+        case "ArrowUp":
+          controller.current.move({x: 0, y: -1});
+          moved = true;
           break;
-        case 'ArrowRight':
-          controller.move({ x: 1, y: 0 });
+        case "ArrowDown":
+          controller.current.move({x: 0, y: 1});
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          moved = true;
           break;
-        case 'a':
-          controller.attack();
+        case " ":
+          controller.current.attack();
           break;
-        case 'd':
-          controller.die();
+        case "a":
+          controller.current.hurt();
           break;
-        case 'h':
-          controller.hurt();
+        case "s":
+          controller.current.die();
           break;
-        case 'i':
-          controller.idle();
+        case "w":
+          controller.current.jump();
           break;
-        case 'j':
-          controller.jump();
-          break;
-        case 'r':
-          controller.run();
-          break;
-        default:
+        case "r":
+          controller.current.run();
           break;
       }
-      setPosition(controller.getPosition());
     };
-
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  });
-
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
   return (
     <canvas
       ref={enemyRef}
       width={window.innerWidth}
       height={window.innerHeight}
-      className="absolute pointer-events-none"
-      style={{
-        top: initialY * 64,
-        left: initialX * 64,
-        imageRendering: "pixelated",
-      }}
+      className="absolute top-0 left-0 z-10 pointer-events-none"
     />
   );
 }
