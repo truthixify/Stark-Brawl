@@ -1,27 +1,16 @@
-import MapRenderer from "./MapRenderer";
-import EnemyRenderer from "../Enemy/EnemyRenderer";
+import GameCanvas from "@/components/Map/GameCanvas";
+import MapRenderer from "@/components/Map/MapRenderer";
+import EnemyRenderer from "@/components/Enemy/EnemyRenderer";
+import { GameProvider } from "@/components/contexts/GameContext";
+import arena from "@/assets/td-tileset3/PNG/game_background_1/game_background_1.png"
 
-interface GameSceneProps {
-  mapSrc: string;
-  enemyId: number;
-  enemyInitialX: number;
-  enemyInitialY: number;
-}
-
-export default function MainGameScene({
-  mapSrc,
-  enemyId,
-  enemyInitialX,
-  enemyInitialY,
-}: GameSceneProps) {
+export default function MainGameScene() {
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-      <MapRenderer src={mapSrc} />
-      <EnemyRenderer
-        enemyId={enemyId}
-        initialX={enemyInitialX}
-        initialY={enemyInitialY}
-      />
-    </div>
-  );
+    <GameProvider>
+      <GameCanvas>
+        <MapRenderer src={arena}/>
+        <EnemyRenderer enemyId={1} initialX={5} initialY={5} />
+      </GameCanvas>
+    </GameProvider>
+  )
 }

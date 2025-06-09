@@ -1,6 +1,9 @@
+type EnemyState = 'idle' | 'walk' | 'run' | 'jump' | 'attack' | 'die' | 'hurt';
+
 export class Enemy {
-    private position: { x: number; y: number};
-    private animation: { [key: string]: () => void };
+    private position: { x: number; y: number };
+    private currentState: EnemyState = 'idle';
+    private animation: Record<EnemyState, () => void>;
 
     constructor(initialPosition: { x: number; y: number }) {
         this.position = initialPosition;
@@ -51,12 +54,23 @@ export class Enemy {
         return this.position;
     }
 
-    public playAnimation(state: string) {
-        const animation = this.animation[state];
-        if (animation) {
-            animation();
-        } else {
-            console.log("Error")
+    public setState(newState: EnemyState) {
+        if (this.currentState !== newState) {
+            this.currentState = newState;
+            this.playAnimation(newState);
         }
+    }
+
+    public getState(): EnemyState {
+        return this.currentState;
+    }
+
+    public playAnimation(state: EnemyState) {
+        const animation = this.animation[state];
+        if (animation) animation();
+    }
+
+    public getAnimation(): EnemyState {
+        return this.currentState;
     }
 }

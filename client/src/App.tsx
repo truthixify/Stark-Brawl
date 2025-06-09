@@ -28,7 +28,7 @@ export default function App() {
         <Route path="/club" element={<ClubPage />} />
         <Route path="/brawlers" element={<Brawlers />} />
         <Route path="/battle-log" element={<BattleLogPage />} />
-        <Route path="/game" element={<MainGameScene mapSrc="/game_background_1.png" enemyId={1} enemyInitialX={100} enemyInitialY={150}/>} />
+        <Route path="/game" element={<MainGameScene />} />
         <Route path="/" element={<Navigate to="/home" replace />} />
       </Routes>
     </BrowserRouter>
