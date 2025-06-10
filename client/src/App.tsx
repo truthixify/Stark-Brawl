@@ -12,25 +12,56 @@ import ClubPage from "@/pages/club-page";
 import PlayerProfile from "@/components/PlayerProfile/PlayerProfile";
 import BattleLogPage from "./pages/battle-log";
 import MainGameScene from "./components/Map/Game";
+import {
+  StarknetConfig,
+  publicProvider,
+  argent,
+  braavos,
+  useInjectedConnectors,
+  voyager,
+} from "@starknet-react/core";
+import { mainnet, sepolia } from "@starknet-react/chains";
+import cartridgeConnector from "./CartredgeConnector";
 
 export default function App() {
+  const { connectors } = useInjectedConnectors({
+    recommended: [argent(), braavos(), cartridgeConnector],
+  });
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/shop" element={<ShopPage />} />
-        <Route path="/social" element={<SocialPage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/leaderboard" element={<LeaderboardPage />} />
-        <Route path="/maps" element={<Maps />} />
-        <Route path="/PlayerProfile" element={<PlayerProfile />} />
-        <Route path="/battle-pass" element={<BattlePass />} />
-        <Route path="/club" element={<ClubPage />} />
-        <Route path="/brawlers" element={<Brawlers />} />
-        <Route path="/battle-log" element={<BattleLogPage />} />
-        <Route path="/game" element={<MainGameScene />} />
-        <Route path="/" element={<Navigate to="/home" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <StarknetConfig
+      chains={[mainnet, sepolia]}
+      provider={publicProvider()}
+      connectors={connectors}
+      explorer={voyager}
+      autoConnect={true}
+    >
+      <BrowserRouter>
+        <Routes>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/social" element={<SocialPage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/maps" element={<Maps />} />
+          <Route path="/PlayerProfile" element={<PlayerProfile />} />
+          <Route path="/battle-pass" element={<BattlePass />} />
+          <Route path="/club" element={<ClubPage />} />
+          <Route path="/brawlers" element={<Brawlers />} />
+          <Route path="/battle-log" element={<BattleLogPage />} />
+          <Route
+            path="/game"
+            element={
+              <MainGameScene
+                mapSrc="/game_background_1.png"
+                enemyId={1}
+                enemyInitialX={100}
+                enemyInitialY={150}
+              />
+            }
+          />
+          <Route path="/" element={<Navigate to="/home" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </StarknetConfig>
   );
 }
