@@ -1,4 +1,3 @@
-#[cfg(test)]
 mod tests {
     use stark_brawl::models::trap::{TrapTrait, TrapType, Vec2, create_trap, ZeroableTrapTrait};
     use starknet::{ContractAddress, contract_address_const};

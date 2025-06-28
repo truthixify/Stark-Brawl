@@ -10,6 +10,7 @@ pub mod models {
     pub mod team;
     pub mod ability;
     pub mod item;
+    pub mod map_tile;
     pub mod inventory;
     pub mod player;
     pub mod quest;
@@ -23,7 +24,9 @@ pub mod models {
     pub mod projectile;
 }
 
+#[cfg(test)]
 pub mod tests {
     pub mod test_trap;
+    pub mod test_map_tile;
 }
 
