@@ -1,12 +1,16 @@
 import { motion } from "framer-motion";
 import { MyMap } from "@/data/maps-data";
 import { ThumbsUp, ThumbsDown, Users, Clock, SquarePen, Eye, Trash, Copy } from "lucide-react";
+import { useState } from "react";
+import SnowyHighlandsMap from "@/components/maps/snowy-highlands-map/SnowyHighlandsMap";
 
 interface MyMapsProps {
 	maps: MyMap[];
 }
 
 const MyMaps: React.FC<MyMapsProps> = ({ maps }) => {
+	const [editingMap, setEditingMap] = useState<string | null>(null);
+	
 	const cardVariants = {
 		hidden: { opacity: 0, x: -20 },
 		visible: (i: number) => ({
@@ -16,6 +20,42 @@ const MyMaps: React.FC<MyMapsProps> = ({ maps }) => {
 		}),
 		exit: { opacity: 0, x: 20, transition: { duration: 0.2 } },
 	};
+
+	const handleEditMap = (mapName: string) => {
+		setEditingMap(mapName);
+	};
+
+	const handleCloseEdit = () => {
+		setEditingMap(null);
+	};
+
+	const handleTowerPlace = (tower: any) => {
+		console.log('Tower placed:', tower);
+		// Handle tower placement logic here
+	};
+
+	// If editing Snowy Highlands map, show the interactive component
+	if (editingMap === "Snowy Highlands") {
+		return (
+			<div className="space-y-4">
+				<div className="flex items-center justify-between">
+					<h2 className="text-xl font-bold text-white">Editing: Snowy Highlands</h2>
+					<motion.button
+						whileHover={{ scale: 1.05 }}
+						whileTap={{ scale: 0.95 }}
+						onClick={handleCloseEdit}
+						className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium"
+					>
+						Close Editor
+					</motion.button>
+				</div>
+				<SnowyHighlandsMap 
+					onTowerPlace={handleTowerPlace}
+					className="bg-blue-600/20 p-4 rounded-lg"
+				/>
+			</div>
+		);
+	}
 
 	return (
 		<>
@@ -104,6 +144,7 @@ const MyMaps: React.FC<MyMapsProps> = ({ maps }) => {
 							<motion.button
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
+								onClick={() => handleEditMap(map.name)}
 								className="px-3 py-1 flex items-center gap-1 bg-blue-600 rounded-lg text-sm font-bold"
 							>
 								<SquarePen width={12} height={12} />
