@@ -1,6 +1,6 @@
     import { useEffect, useRef, useState } from "react";
     import Desert from "@/assets/maps/desert-bonefiel-map.png";
-    import Tower from "@/assets/tower-defense-monster-2d-sprites/PNG/1/1_enemies_1_ATTACK_000.png";
+    import Tower from "@/assets/archer-tower-game-assets/PNG/9.png";
 
     interface Coordinates {
     position_x: number;
@@ -43,7 +43,7 @@
         towerImg.src = Tower;
         towerImg.onload = () => {
             placedTowers.forEach((tower) => {
-            context.drawImage(towerImg, tower.position_x - 20, tower.position_y - 60, 100, 100);
+            context.drawImage(towerImg, tower.position_x - 30, tower.position_y - 60, 100, 100);
             });
         };
         };
