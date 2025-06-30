@@ -19,10 +19,13 @@ pub mod models {
     pub mod coins;
     pub mod gems;
     pub mod trap;
+    pub mod tower_stats;
     pub mod tower; 
     pub mod enemy;
     pub mod projectile;
 }
+
+mod store;
 
 #[cfg(test)]
 pub mod tests {
