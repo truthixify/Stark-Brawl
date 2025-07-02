@@ -23,6 +23,7 @@ pub mod models {
     pub mod tower; 
     pub mod enemy;
     pub mod projectile;
+    pub mod enemy_path;
 }
 
 mod store;
