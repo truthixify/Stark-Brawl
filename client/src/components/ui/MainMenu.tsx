@@ -22,7 +22,7 @@ export default function MainMenu() {
   const [showNav, setShowNav] = useState(false);
 
   return (
-    <div className="w-full h-screen bg-[url('/homeBackground.png')] bg-cover bg-center relative flex items-center justify-center px-4 sm:px-8">
+    <div className={`w-full h-screen bg-[url('assets/maps/Galactic.jpeg')] bg-cover bg-center relative flex items-center justify-center px-4 sm:px-8`}>
       <motion.section
         variants={fadeVariant}
         initial="hidden"
