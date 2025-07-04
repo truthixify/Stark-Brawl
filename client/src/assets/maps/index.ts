@@ -10,27 +10,30 @@ import Nebula from "./Nebula.jpeg";
 import Neon from "./Neon.jpeg";
 import Quantum from "./Quantum.jpeg";
 import Shadow from "./Shadow.jpeg";
+import SnowyHighlands from "./SnowyHighlands.jpeg";
 import Solar from "./Solar.jpeg";
 import Stadium from "./Stadium.jpeg";
 import Starlight from "./Starlight.jpeg";
 import Stellar from "./Stellar.jpeg";
-
+import ToxicSwamp from "./toxic-swamp.jpeg";
 
 export {
-    Cavern,
-    Creek,
-    Echo,
-    Factory,
-    Forsaken,
-    Galactic,
-    Lunar,
-    NebulaDark,
-    Nebula,
-    Neon,
-    Quantum,
-    Shadow,
-    Solar,
-    Stadium,
-    Starlight,
-    Stellar
+  Cavern,
+  Creek,
+  Echo,
+  Factory,
+  Forsaken,
+  Galactic,
+  Lunar,
+  NebulaDark,
+  Nebula,
+  Neon,
+  Quantum,
+  Shadow,
+  SnowyHighlands,
+  Solar,
+  Stadium,
+  Starlight,
+  Stellar,
+  ToxicSwamp,
 };
