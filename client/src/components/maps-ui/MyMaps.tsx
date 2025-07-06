@@ -86,10 +86,10 @@ const MyMaps: React.FC<MyMapsProps> = ({ maps }) => {
             Close Editor
           </motion.button>
         </div>
-        <ToxicSwampMap
+        {/* <ToxicSwampMap
           onTowerPlaced={handleTowerPlace}
           className="bg-blue-600/20 p-4 rounded-lg"
-        />
+        /> */}
       </div>
     );
   }
@@ -114,10 +114,10 @@ const MyMaps: React.FC<MyMapsProps> = ({ maps }) => {
           <div className="w-full h-[200px] md:w-[250px] md:h-[260px] flex-shrink-0 rounded-lg mb-4 md:mb-0 md:mr-4">
             {map.type === "ToxicSwamp" ? (
               <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden">
-                <ToxicSwampMap
+                {/* <ToxicSwampMap
                   disabled={true}
                   className="w-full h-full pointer-events-none"
-                />
+                /> */}
               </div>
             ) : (
               <img
