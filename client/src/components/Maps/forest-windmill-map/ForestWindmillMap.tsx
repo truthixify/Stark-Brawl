@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import mapImage from "@/assets/maps/forest-windmill.png";
+import mapImage from "@/assets/td-tilesets1-2/tower-defense-game-tilesets/PNG/game_background_1/game_background_1.png";
 import archerTower from "@/assets/archer-tower-game-assets/PNG/1.png";
 import stoneTower from "@/assets/stone-tower-game-assets/PNG/1.png";
 import supportTower from "@/assets/support-tower-game-assets/PNG/1.png";
