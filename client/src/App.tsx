@@ -23,7 +23,6 @@ import {
 import { mainnet, sepolia } from "@starknet-react/chains";
 import cartridgeConnector from "./CartredgeConnector";
 import MainMenu from "./components/ui/MainMenu";
-import DesertBonefieldMap from "./components/maps/desert-bonefield-map/DesertBonefieldMap";
 
 
 export default function App() {
@@ -40,7 +39,7 @@ export default function App() {
     >
       <BrowserRouter>
         <Routes>
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/home" element={<MainMenu />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/social" element={<SocialPage />} />
           <Route path="/events" element={<EventsPage />} />
@@ -53,7 +52,6 @@ export default function App() {
           <Route path="/battle-log" element={<BattleLogPage />} />
           <Route path="/game" element={<MainGameScene />} />
           <Route path="/interface" element={<MainMenu />} />
-          <Route path="/game/desert-bonefield" element={<DesertBonefieldMap />} />
           <Route path="/" element={<Navigate to="/home" replace />} />
         </Routes>
       </BrowserRouter>
