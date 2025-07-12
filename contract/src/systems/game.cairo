@@ -15,14 +15,14 @@ pub trait IBrawlGame<T> {
 #[dojo::contract]
 pub mod brawl_game {
     use super::IBrawlGame;
-    use starknet::{ContractAddress, get_block_timestamp};
+    use starknet::{ContractAddress, get_block_timestamp, get_caller_address()};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
     
     // Models
     use stark_brawl::models::player::{Player, PlayerTrait};
     use stark_brawl::models::ability::{Ability};
     use stark_brawl::models::match::{Match};
-    use stark_brawl::models::item::{Item, ItemImpl};
+    use stark_brawl::models::item::{Item, ItemImpl, ItemType};
     use stark_brawl::models::inventory::{Inventory, InventoryImpl};
 
     // Store
@@ -45,7 +45,7 @@ pub mod brawl_game {
         fn join_match(ref self: ContractState) {
             let mut world = self.world(@"stark_brawl");
             let store = StoreTrait::new(world);
-            let caller = starknet::get_caller_address();
+            let caller = get_caller_address();
 
             store.register_player(caller);
             store.assign_to_match(caller, self.match_counter.read());
