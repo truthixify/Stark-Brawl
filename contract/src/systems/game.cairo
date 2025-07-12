@@ -81,34 +81,33 @@ pub mod brawl_game {
             player.status()
         }
 
-        fn use_item(ref self: ContractState, item_id: u32) -> bool {
+        fn use_item(ref self: ContractState, item_id: u256) {
             let mut world = self.world(@"stark_brawl");
-            let mut store = StoreTrait::new(world);
-
-            // Read player's inventory
-            let mut inventory = store.read_player_inventory();
+            let store = StoreTrait::new(world);
+            let caller = get_caller_address();
+        
+            let inventory = store.read_inventory(caller.into());
+        
+            assert(store.has_item(inventory, item_id), 'Player does not have item');
+            
             let item = store.read_item(item_id);
-            
-            // Validate that the item exists in inventory
-            // if !self._has_item_in_inventory(@inventory, item_id) {
-            //     return false;
-            // }
-
-            // // Read the item to understand its effects
-            // let item = store.read_item(item_id);
-            
-            // // Apply item effects to player
-            // let mut player = store.read_player();
-            // self._apply_item_effects(ref player, @item);
-            
-            // // Remove item from inventory (assuming it's consumable)
-            // inventory.remove_item(item_id);
-            
-            // // Save updates
-            // store.write_player(@player);
-            // store.write_player_inventory(@inventory);
-            
-            true
+            assert(item.usable, 'Item is not usable');
+        
+            match item.item_type {
+                ItemType::Trap => {
+                    // aplicar lógica de trampa
+                },
+                ItemType::Upgrade => {
+                    // aumentar algún stat temporal
+                },
+                ItemType::Consumable => {
+                    // restaurar vida, maná, etc.
+                    // posiblemente eliminar del inventario
+                },
+                _ => {
+                    // ignorar si no es de combate
+                }
+            };
         }
 
         // fn get_player_inventory(ref self: ContractState) -> Inventory {
@@ -124,52 +123,5 @@ pub mod brawl_game {
             
         //     store.read_item(item_id)
         // }
-    }
-
-    // Internal helper functions
-    #[generate_trait]
-    impl InternalFunctions of InternalFunctionsTrait {
-        fn _has_item_in_inventory(ref self: ContractState, inventory: @Inventory, item_id: u32) -> bool {
-            let mut i = 0;
-            loop {
-                if i >= inventory.items.len() {
-                    break false;
-                }
-                
-                let current_item = inventory.items.at(i);
-                if current_item.id == @item_id {
-                    break true;
-                }
-                
-                i += 1;
-            }
-        }
-
-        fn _apply_item_effects(ref self: ContractState, ref player: Player, item: @Item) {
-            // This is where you define what each item does
-            // For example, based on item name or ID:
-            
-            if item.name == @"health_potion" {
-                // Heal player
-                player.health = player.health + (*item.value).into();
-            } else if item.name == @"strength_boost" {
-                // Boost player attack (assuming player has attack field)
-                // player.attack = player.attack + (*item.value).into();
-            } else if item.name == @"trap" {
-                // Apply trap effects - this would interact with game mechanics
-                // Could damage enemies in range, slow them down, etc.
-            }
-            // Add more item effects as needed
-        }
-
-        fn _is_item_usable_in_context(ref self: ContractState, item: @Item) -> bool {
-            // Add validation logic here
-            // For example:
-            // - Can only use healing items when health is not full
-            // - Can only use traps during specific game phases
-            // - etc.
-            
-            true // For now, allow all items
-        }
     }
 }
