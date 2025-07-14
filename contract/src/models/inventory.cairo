@@ -124,8 +124,9 @@ pub impl ZeroableInventoryTrait of Zero<Inventory> {
 #[cfg(test)]
 mod tests {
     use super::{InventoryImpl, ItemImpl, 
-        MAX_INVENTORY_CAPACITY
+        MAX_INVENTORY_CAPACITY,
     };
+    use stark_brawl::models::item::ItemType;
 
     #[test]
     fn test_new_inventory() {
