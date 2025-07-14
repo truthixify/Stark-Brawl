@@ -1,7 +1,7 @@
-import nft4 from "@/assets/nft4.png"
-import nft5 from "@/assets/nft5.png"
-import nft2 from "@/assets/nft2.png"
-import nft3 from "@/assets/nft3.png"
+import nft4 from "@/assets/monster-character-2d-sprites/PNG/2/2_enemies_1_ATTACK_000.png"
+import nft5 from "@/assets/monster-character-2d-sprites/PNG/2/2_enemies_1_ATTACK_000.png"
+import nft2 from "@/assets/monster-character-2d-sprites/PNG/2/2_enemies_1_ATTACK_000.png"
+import nft3 from "@/assets/monster-character-2d-sprites/PNG/2/2_enemies_1_ATTACK_000.png"
 
 export interface Clan {
   id: number;
