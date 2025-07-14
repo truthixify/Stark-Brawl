@@ -81,47 +81,65 @@ pub mod brawl_game {
             player.status()
         }
 
-        fn use_item(ref self: ContractState, item_id: u256) {
+        fn use_item(ref self: ContractState, item_id: u32) {
             let mut world = self.world(@"stark_brawl");
-            let store = StoreTrait::new(world);
+            let mut store = StoreTrait::new(world);
             let caller = get_caller_address();
-        
-            let inventory = store.read_inventory(caller.into());
+            
+            // Get player's inventory (simplified for now)
+            let mut inventory = store.read_inventory(caller.into());
         
             assert(store.has_item(inventory, item_id), 'Player does not have item');
             
             let item = store.read_item(item_id);
             assert(item.usable, 'Item is not usable');
+            
+            // Get player to modify their stats
+            let mut player = store.read_player();
         
             match item.item_type {
                 ItemType::Trap => {
-                    // aplicar lógica de trampa
+                    // Deploy trap that damages enemies
+                    let trap_damage: u32 = item.value.into() * 3; // Traps do 3x item value damage
+                    
+                    // TODO: Implement actual enemy targeting system
+                    
+                    // Remove trap from inventory after deployment
+                    inventory.remove_item(item_id);
                 },
                 ItemType::Upgrade => {
-                    // aumentar algún stat temporal
+                    // Permanent player stat improvements
+                    if item.name == "health_upgrade" {
+                        // Increase max health permanently
+                        player.max_hp += item.value;
+                        // Also heal to new max if current health is full
+                        if player.hp == player.max_hp - item.value {
+                            player.hp = player.max_hp;
+                        }
+                    } else if item.name == "experience_boost" {
+                        // Give XP boost
+                        player.add_xp(item.value.into() * 10);
+                    } else {
+                        // Default upgrade: increase max health
+                        player.max_hp += item.value;
+                    }
+                    
+                    // Upgrades are consumed when used
+                    inventory.remove_item(item_id);
                 },
                 ItemType::Consumable => {
-                    // restaurar vida, maná, etc.
-                    // posiblemente eliminar del inventario
+                    // Heal the player
+                    let heal_amount: u16 = item.value;
+                    player.heal(heal_amount);
+                    
+                    // Remove consumable from inventory (single use)
+                    inventory.remove_item(item_id);
                 },
-                _ => {
-                    // ignorar si no es de combate
-                }
-            };
+            }
+            
+            // Save all changes
+            store.write_player(@player);
+            store.write_inventory(@inventory);
         }
-
-        // fn get_player_inventory(ref self: ContractState) -> Inventory {
-        //     let mut world = self.world(@"stark_brawl");
-        //     let store = StoreTrait::new(world);
-            
-        //     store.read_player_inventory()
-        // }
-
-        // fn get_item_details(ref self: ContractState, item_id: u32) -> Item {
-        //     let mut world = self.world(@"stark_brawl");
-        //     let store = StoreTrait::new(world);
-            
-        //     store.read_item(item_id)
-        // }
     }
 }
