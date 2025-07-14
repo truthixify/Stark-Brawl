@@ -124,8 +124,9 @@ pub impl ZeroableInventoryTrait of Zero<Inventory> {
 #[cfg(test)]
 mod tests {
     use super::{InventoryImpl, ItemImpl, 
-        MAX_INVENTORY_CAPACITY
+        MAX_INVENTORY_CAPACITY,
     };
+    use stark_brawl::models::item::ItemType;
 
     #[test]
     fn test_new_inventory() {
@@ -139,7 +140,7 @@ mod tests {
     #[test]
     fn test_add_item() {
         let mut inventory = InventoryImpl::new(1);
-        let item = ItemImpl::new(1, "sword", "a basic sword", 100);
+        let item = ItemImpl::new(1, "sword", "a basic sword", 100, ItemType::Upgrade, true);
 
         assert(inventory.add_item(item), 'Should add item');
         assert(inventory.items.len() == 1, 'Should have one item');
@@ -149,7 +150,7 @@ mod tests {
     fn test_inventory_full() {
         let mut inventory = InventoryImpl::new(1);
 
-        let test_item = ItemImpl::new(1, "sword", "a basic sword", 100);
+        let test_item = ItemImpl::new(1, "sword", "a basic sword", 100, ItemType::Upgrade, true);
 
         let mut i = 0;
         loop {
@@ -171,7 +172,7 @@ mod tests {
     #[test]
     fn test_remove_item() {
         let mut inventory = InventoryImpl::new(1);
-        let item = ItemImpl::new(1, "sword", "a basic sword", 100);
+        let item = ItemImpl::new(1, "sword", "a basic sword", 100, ItemType::Upgrade, true);
 
         inventory.add_item(item);
         assert(inventory.remove_item(1), 'Should remove item');
@@ -181,7 +182,7 @@ mod tests {
     #[test]
     fn test_available_space() {
         let mut inventory = InventoryImpl::new(1);
-        let item = ItemImpl::new(1, "sword", "a basic sword", 100);
+        let item = ItemImpl::new(1, "sword", "a basic sword", 100, ItemType::Upgrade, true);
 
         assert(inventory.available_space() == MAX_INVENTORY_CAPACITY, 'Should be empty');
         inventory.add_item(item);
