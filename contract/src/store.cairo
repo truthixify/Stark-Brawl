@@ -1,11 +1,8 @@
 use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
-use stark_brawl::models::ability::Ability;
 use stark_brawl::models::inventory::{Inventory, InventoryImpl};
 use stark_brawl::models::item::Item;
-use stark_brawl::models::player::Player;
 use stark_brawl::models::tower_stats::TowerStats;
-use starknet::ContractAddress;
 
 #[derive(Drop)]
 struct Store {
@@ -59,12 +56,12 @@ impl StoreImpl of StoreTrait {
             if i >= inventory.items.len() {
                 break false;
             }
-            
+
             let current_item = inventory.items.at(i);
             if current_item.id == @item_id {
                 break true;
             }
-            
+
             i += 1;
         }
     }
