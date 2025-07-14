@@ -1,4 +1,4 @@
-#[derive(Drop, Serde, Clone)]
+#[derive(Drop, Serde, Clone, Debug, PartialEq, Introspect)]
 #[dojo::model]
 pub struct Item {
     #[key]
@@ -10,7 +10,7 @@ pub struct Item {
     pub usable: bool,
 }
 
-#[derive(Copy, Drop, Serde, Debug, PartialEq)]
+#[derive(Copy, Drop, Serde, Debug, PartialEq, Introspect)]
 pub enum ItemType {
     Trap,
     Upgrade,
