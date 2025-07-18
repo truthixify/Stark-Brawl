@@ -2,7 +2,6 @@
 use starknet::{ContractAddress, contract_address_const};
 use core::num::traits::zero::Zero;
 
-
 #[derive(Copy, Drop, Serde, IntrospectPacked, Debug)]
 #[dojo::model]
 pub struct Player {
@@ -13,6 +12,8 @@ pub struct Player {
     pub hp: u16,
     pub max_hp: u16,
     pub starks: u128,
+    pub coins: u32,
+    pub gems: u32,
 }
 
 pub fn ZERO_ADDRESS() -> ContractAddress {
@@ -36,8 +37,25 @@ pub impl PlayerImpl of PlayerTrait {
     fn heal(ref self: Player, amount: u16) {
         self.hp = core::cmp::min(self.hp + amount, self.max_hp);
     }
-}
 
+    fn add_coins(ref self: Player, amount: u32) {
+        self.coins += amount;
+    }
+
+    fn add_gems(ref self: Player, amount: u32) {
+        self.gems += amount;
+    }
+
+    fn spend_coins(ref self: Player, amount: u32) {
+        assert(self.coins >= amount, 'Player: Not enough coins');
+        self.coins -= amount;
+    }
+
+    fn spend_gems(ref self: Player, amount: u32) {
+        assert(self.gems >= amount, 'Player: Not enough gems');
+        self.gems -= amount;
+    }
+}
 
 #[generate_trait]
 pub impl PlayerAssert of AssertTrait {
@@ -55,7 +73,16 @@ pub impl PlayerAssert of AssertTrait {
 pub impl ZeroablePlayerTrait of Zero<Player> {
     #[inline(always)]
     fn zero() -> Player {
-        Player { address: ZERO_ADDRESS(), level: 0, xp: 0, hp: 0, max_hp: 0, starks: 0 }
+        Player {
+            address: ZERO_ADDRESS(),
+            level: 0,
+            xp: 0,
+            hp: 0,
+            max_hp: 0,
+            starks: 0,
+            coins: 0,
+            gems: 0,
+        }
     }
 
     #[inline(always)]
@@ -69,25 +96,52 @@ pub impl ZeroablePlayerTrait of Zero<Player> {
     }
 }
 
-
 pub fn spawn_player(address: ContractAddress) -> Player {
-    Player { address, level: 1, xp: 0, hp: 100, max_hp: 100, starks: 0 }
+    Player { address, level: 1, xp: 0, hp: 100, max_hp: 100, starks: 0, coins: 0, gems: 0 }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{Player, ZeroablePlayerTrait};
+    use super::{Player, ZeroablePlayerTrait, spawn_player, PlayerTrait};
     use starknet::{ContractAddress, contract_address_const};
 
     #[test]
     fn test_player_initialization() {
         let addr: ContractAddress = contract_address_const::<0x123>();
-
-        let player = Player { address: addr, level: 1, xp: 0, hp: 100, max_hp: 100, starks: 0 };
+        let player = spawn_player(addr);
 
         assert(player.address == addr, 'Address mismatch');
         assert(player.level == 1, 'Invalid level');
         assert(player.hp == 100, 'Invalid hp');
+        assert(player.coins == 0, 'Coins should be 0');
+        assert(player.gems == 0, 'Gems should be 0');
+    }
+
+    #[test]
+    fn test_add_currency() {
+        let addr: ContractAddress = contract_address_const::<0x123>();
+        let mut player = spawn_player(addr);
+
+        player.add_coins(50_u32);
+        player.add_gems(5_u32);
+
+        assert(player.coins == 50_u32, 'Coins not added correctly');
+        assert(player.gems == 5_u32, 'Gems not added correctly');
+    }
+
+    #[test]
+    fn test_spend_currency() {
+        let addr: ContractAddress = contract_address_const::<0x123>();
+        let mut player = spawn_player(addr);
+
+        player.add_coins(100_u32);
+        player.add_gems(10_u32);
+
+        player.spend_coins(40_u32);
+        player.spend_gems(4_u32);
+
+        assert(player.coins == 60_u32, 'Coins not spent correctly');
+        assert(player.gems == 6_u32, 'Gems not spent correctly');
     }
 
     #[test]
@@ -99,9 +153,7 @@ mod tests {
     #[test]
     fn test_non_zero_player() {
         let addr: ContractAddress = contract_address_const::<0xABC>();
-
-        let player = Player { address: addr, level: 1, xp: 0, hp: 100, max_hp: 100, starks: 0 };
-
+        let player = spawn_player(addr);
         assert(player.is_non_zero(), 'Should be non-zero');
     }
 }
