@@ -4,7 +4,7 @@ use stark_brawl::models::tower_stats::TowerStats;
 
 #[derive(Drop)]
 struct Store {
-    world: WorldStorage
+    world: WorldStorage,
 }
 
 #[generate_trait]
@@ -23,5 +23,4 @@ impl StoreImpl of StoreTrait {
     fn set_tower_stats(ref self: Store, tower_stats: TowerStats) {
         self.world.write_model(@tower_stats);
     }
-
 }
