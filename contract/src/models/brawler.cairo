@@ -50,13 +50,7 @@ impl BrawlerImpl of BrawlerSystem {
 pub impl ZeroableBrawler of Zero<Brawler> {
     #[inline(always)]
     fn zero() -> Brawler {
-        Brawler {
-            id: 0_u64,
-            name: '0',
-            base_health: 0,
-            base_attack: 0,
-            ability_id: 0_u256,
-        }
+        Brawler { id: 0_u64, name: '0', base_health: 0, base_attack: 0, ability_id: 0_u256 }
     }
 
     #[inline(always)]

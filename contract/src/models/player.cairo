@@ -1,4 +1,3 @@
-
 // Imports
 use starknet::{ContractAddress, contract_address_const};
 use core::num::traits::zero::Zero;
@@ -56,14 +55,7 @@ pub impl PlayerAssert of AssertTrait {
 pub impl ZeroablePlayerTrait of Zero<Player> {
     #[inline(always)]
     fn zero() -> Player {
-        Player {
-            address:ZERO_ADDRESS(),
-            level: 0,
-            xp: 0,
-            hp: 0,
-            max_hp: 0,
-            starks: 0,
-        }
+        Player { address: ZERO_ADDRESS(), level: 0, xp: 0, hp: 0, max_hp: 0, starks: 0 }
     }
 
     #[inline(always)]
@@ -79,14 +71,7 @@ pub impl ZeroablePlayerTrait of Zero<Player> {
 
 
 pub fn spawn_player(address: ContractAddress) -> Player {
-    Player {
-        address,
-        level: 1,
-        xp: 0,
-        hp: 100,
-        max_hp: 100,
-        starks: 0,
-    }
+    Player { address, level: 1, xp: 0, hp: 100, max_hp: 100, starks: 0 }
 }
 
 #[cfg(test)]
@@ -98,14 +83,7 @@ mod tests {
     fn test_player_initialization() {
         let addr: ContractAddress = contract_address_const::<0x123>();
 
-        let player = Player {
-            address: addr,
-            level: 1,
-            xp: 0,
-            hp: 100,
-            max_hp: 100,
-            starks: 0,
-        };
+        let player = Player { address: addr, level: 1, xp: 0, hp: 100, max_hp: 100, starks: 0 };
 
         assert(player.address == addr, 'Address mismatch');
         assert(player.level == 1, 'Invalid level');
@@ -122,16 +100,8 @@ mod tests {
     fn test_non_zero_player() {
         let addr: ContractAddress = contract_address_const::<0xABC>();
 
-        let player = Player {
-            address: addr,
-            level: 1,
-            xp: 0,
-            hp: 100,
-            max_hp: 100,
-            starks: 0,
-        };
+        let player = Player { address: addr, level: 1, xp: 0, hp: 100, max_hp: 100, starks: 0 };
 
         assert(player.is_non_zero(), 'Should be non-zero');
     }
-
 }

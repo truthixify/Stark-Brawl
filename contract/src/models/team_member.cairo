@@ -7,7 +7,7 @@ pub struct TeamMember {
     pub team_id: ContractAddress,
     #[key]
     pub member: ContractAddress,
-    pub slot: u8, 
+    pub slot: u8,
 }
 
 #[cfg(test)]
