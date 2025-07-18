@@ -19,24 +19,21 @@ pub mod errors {
 #[generate_trait]
 pub impl GemsImpl of GemsTrait {
     fn new(player_id: ContractAddress) -> Gems {
-        Gems {
-            player_id,
-            amount: 0,
-        }
+        Gems { player_id, amount: 0 }
     }
 
     fn add_gems(ref self: Gems, amount: u64) -> bool {
         let new_amount = self.amount + amount;
-        
+
         assert(new_amount >= self.amount, errors::OVERFLOW_ERROR);
-        
+
         self.amount = new_amount;
         true
     }
 
     fn spend_gems(ref self: Gems, amount: u64) -> bool {
         assert(self.amount >= amount, errors::INSUFFICIENT_BALANCE);
-        
+
         self.amount -= amount;
         true
     }
@@ -62,10 +59,7 @@ pub impl GemsAssert of AssertTrait {
 pub impl ZeroableGemsTrait of Zero<Gems> {
     #[inline(always)]
     fn zero() -> Gems {
-        Gems {
-            player_id: contract_address_const::<0x0>(),
-            amount: 0,
-        }
+        Gems { player_id: contract_address_const::<0x0>(), amount: 0 }
     }
 
     #[inline(always)]
@@ -88,7 +82,7 @@ mod tests {
     fn test_gems_initialization() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let gems = GemsImpl::new(addr);
-        
+
         assert(gems.player_id == addr, 'Player ID mismatch');
         assert(gems.amount == 0, 'Should start with 0 gems');
     }
@@ -97,10 +91,10 @@ mod tests {
     fn test_add_gems() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let mut gems = GemsImpl::new(addr);
-        
+
         assert(gems.add_gems(50), 'Should add gems');
         assert(gems.amount == 50, 'Balance should be updated');
-        
+
         assert(gems.add_gems(25), 'Should add more gems');
         assert(gems.amount == 75, 'Balance should be 75');
     }
@@ -109,7 +103,7 @@ mod tests {
     fn test_spend_gems() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let mut gems = GemsImpl::new(addr);
-        
+
         gems.add_gems(100);
         assert(gems.spend_gems(30), 'Should spend gems');
         assert(gems.amount == 70, 'Balance should be updated');
@@ -120,7 +114,7 @@ mod tests {
     fn test_insufficient_balance() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let mut gems = GemsImpl::new(addr);
-        
+
         gems.add_gems(20);
         gems.spend_gems(50); // Should fail
     }
@@ -129,7 +123,7 @@ mod tests {
     fn test_has_enough() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let mut gems = GemsImpl::new(addr);
-        
+
         gems.add_gems(100);
         assert(GemsImpl::has_enough(@gems, 50), 'Should have enough');
         assert(!GemsImpl::has_enough(@gems, 150), 'Should not have enough');
@@ -145,7 +139,7 @@ mod tests {
     fn test_large_amounts() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let mut gems = GemsImpl::new(addr);
-        
+
         gems.add_gems(5000);
         gems.add_gems(10000);
         assert(gems.amount == 15000, 'Should handle large amounts');

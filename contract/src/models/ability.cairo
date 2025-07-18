@@ -37,12 +37,7 @@ pub impl ZeroableAbilityTrait of Zero<Ability> {
     #[inline(always)]
     fn zero() -> Ability {
         Ability {
-            id: 0_u256,
-            name: '0',
-            power: 0_u256,
-            cooldown: 0,
-            mana_cost: 0,
-            level_required: 0,
+            id: 0_u256, name: '0', power: 0_u256, cooldown: 0, mana_cost: 0, level_required: 0,
         }
     }
 
@@ -131,5 +126,4 @@ mod tests {
         let ability = ZeroableAbilityTrait::zero();
         assert(ability.is_zero(), 'Zero ability should be zero');
     }
-
 }

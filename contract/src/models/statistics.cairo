@@ -37,18 +37,12 @@ pub impl StatisticsImpl of StatisticsTrait {
         let rate = (wins * 100) / matches;
         rate.into()
     }
-
 }
 
 pub impl ZeroableStatistics of Zero<Statistics> {
     #[inline(always)]
     fn zero() -> Statistics {
-        Statistics {
-            player_id: '0',
-            matches_played: 0,
-            wins: 0,
-            defeats: 0,
-        }
+        Statistics { player_id: '0', matches_played: 0, wins: 0, defeats: 0 }
     }
 
     #[inline(always)]
@@ -68,12 +62,7 @@ mod tests {
 
     #[test]
     fn test_increment_all() {
-        let mut s = Statistics {
-            player_id: '1',
-            matches_played: 0,
-            wins: 0,
-            defeats: 0,
-        };
+        let mut s = Statistics { player_id: '1', matches_played: 0, wins: 0, defeats: 0 };
 
         StatisticsImpl::increment_matches_played(ref s);
         StatisticsImpl::increment_wins(ref s);
@@ -86,12 +75,7 @@ mod tests {
 
     #[test]
     fn test_win_rate() {
-        let s = Statistics {
-            player_id: '1',
-            matches_played: 2,
-            wins: 1,
-            defeats: 1,
-        };
+        let s = Statistics { player_id: '1', matches_played: 2, wins: 1, defeats: 1 };
 
         let rate = StatisticsImpl::get_win_rate(@s);
         assert(rate == 50, 'Win rate should be 50');
@@ -103,12 +87,7 @@ mod tests {
         assert(ZeroableStatistics::is_zero(@zero), 'Should be zero');
         assert(!ZeroableStatistics::is_non_zero(@zero), 'Should not be non-zero');
 
-        let s = Statistics {
-            player_id: '1',
-            matches_played: 1,
-            wins: 0,
-            defeats: 1,
-        };
+        let s = Statistics { player_id: '1', matches_played: 1, wins: 0, defeats: 1 };
 
         assert(!ZeroableStatistics::is_zero(@s), 'Should not be zero');
         assert(ZeroableStatistics::is_non_zero(@s), 'Should be non-zero');

@@ -46,7 +46,7 @@ pub impl CharacterImpl of CharacterTrait {
     fn is_zero(self: @Character) -> bool {
         *self.id == 0_u256
     }
-    
+
     #[inline(always)]
     fn is_non_zero(self: @Character) -> bool {
         !Self::is_zero(self)
@@ -58,20 +58,14 @@ pub impl CharacterImpl of CharacterTrait {
 pub impl ZeroableCharacter of Zero<Character> {
     #[inline(always)]
     fn zero() -> Character {
-        Character {
-            id: 0_u256,
-            name: '0',
-            health: 0_u256,
-            attack: 0_u256,
-            owner: '0',
-        }
+        Character { id: 0_u256, name: '0', health: 0_u256, attack: 0_u256, owner: '0' }
     }
 
     #[inline(always)]
     fn is_zero(self: @Character) -> bool {
         *self.id == 0_u256
     }
-    
+
     #[inline(always)]
     fn is_non_zero(self: @Character) -> bool {
         !Self::is_zero(self)
@@ -85,23 +79,11 @@ mod tests {
     use super::*;
 
     fn sample_char() -> Character {
-        Character {
-            id: 1_u256,
-            name: 'Knight',
-            health: 100_u256,
-            attack: 25_u256,
-            owner: 'Alice',
-        }
+        Character { id: 1_u256, name: 'Knight', health: 100_u256, attack: 25_u256, owner: 'Alice' }
     }
 
     fn attacker_char() -> Character {
-        Character {
-            id: 2_u256,
-            name: 'Orc',
-            health: 80_u256,
-            attack: 25_u256,
-            owner: 'AI',
-        }
+        Character { id: 2_u256, name: 'Orc', health: 80_u256, attack: 25_u256, owner: 'AI' }
     }
 
     #[test]

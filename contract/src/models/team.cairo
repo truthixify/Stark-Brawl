@@ -24,10 +24,7 @@ pub impl TeamImpl of TeamTrait {
 pub impl ZeroableTeamTrait of Zero<Team> {
     #[inline(always)]
     fn zero() -> Team {
-        Team {
-            id: contract_address_const::<0>(),
-            max_size: 0,
-        }
+        Team { id: contract_address_const::<0>(), max_size: 0 }
     }
 
     #[inline(always)]
@@ -47,10 +44,7 @@ mod tests {
     use starknet::contract_address_const;
 
     fn sample_team() -> Team {
-        Team {
-            id: contract_address_const::<0xAAA>(),
-            max_size: 3,
-        }
+        Team { id: contract_address_const::<0xAAA>(), max_size: 3 }
     }
 
     #[test]

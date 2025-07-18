@@ -38,10 +38,7 @@ pub impl TicketsImpl of TicketsTrait {
 pub impl ZeroableTickets of Zero<Tickets> {
     #[inline(always)]
     fn zero() -> Tickets {
-        Tickets {
-            player: contract_address_const::<0>(),
-            amount: 0_u32,
-        }
+        Tickets { player: contract_address_const::<0>(), amount: 0_u32 }
     }
 
     #[inline(always)]

@@ -19,18 +19,15 @@ pub mod errors {
 pub impl CoinsImpl of CoinsTrait {
     // Create a new instance of Coins
     fn new(player_id: ContractAddress) -> Coins {
-        Coins {
-            player_id,
-            amount: 0,
-        }
+        Coins { player_id, amount: 0 }
     }
 
     // Add coins to player's balance
     fn add_coins(ref self: Coins, amount: u64) -> bool {
         let new_amount = self.amount + amount;
-        
+
         assert(new_amount >= self.amount, errors::OVERFLOW_ERROR);
-        
+
         self.amount = new_amount;
         true
     }
@@ -38,7 +35,7 @@ pub impl CoinsImpl of CoinsTrait {
     // Spend coins (with balance check)
     fn spend_coins(ref self: Coins, amount: u64) -> bool {
         assert(self.amount >= amount, errors::INSUFFICIENT_BALANCE);
-        
+
         self.amount -= amount;
         true
     }
@@ -65,10 +62,7 @@ pub impl CoinsAssert of AssertTrait {
 pub impl ZeroableCoinsTrait of Zero<Coins> {
     #[inline(always)]
     fn zero() -> Coins {
-        Coins {
-            player_id: contract_address_const::<0x0>(),
-            amount: 0,
-        }
+        Coins { player_id: contract_address_const::<0x0>(), amount: 0 }
     }
 
     #[inline(always)]
@@ -91,7 +85,7 @@ mod tests {
     fn test_coins_initialization() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let coins = CoinsImpl::new(addr);
-        
+
         assert(coins.player_id == addr, 'Player ID mismatch');
         assert(coins.amount == 0, 'Should start with 0 coins');
     }
@@ -100,10 +94,10 @@ mod tests {
     fn test_add_coins() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let mut coins = CoinsImpl::new(addr);
-        
+
         assert(coins.add_coins(100), 'Should add coins');
         assert(coins.amount == 100, 'Balance should be updated');
-        
+
         assert(coins.add_coins(50), 'Should add more coins');
         assert(coins.amount == 150, 'Balance should be 150');
     }
@@ -112,7 +106,7 @@ mod tests {
     fn test_spend_coins() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let mut coins = CoinsImpl::new(addr);
-        
+
         coins.add_coins(100);
         assert(coins.spend_coins(50), 'Should spend coins');
         assert(coins.amount == 50, 'Balance should be updated');
@@ -123,7 +117,7 @@ mod tests {
     fn test_insufficient_balance() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let mut coins = CoinsImpl::new(addr);
-        
+
         coins.add_coins(50);
         coins.spend_coins(100); // Should fail
     }
@@ -132,7 +126,7 @@ mod tests {
     fn test_has_enough() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let mut coins = CoinsImpl::new(addr);
-        
+
         coins.add_coins(100);
         assert(CoinsImpl::has_enough(@coins, 50), 'Should have enough');
         assert(!CoinsImpl::has_enough(@coins, 150), 'Should not have enough');
@@ -148,10 +142,9 @@ mod tests {
     fn test_large_amounts() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let mut coins = CoinsImpl::new(addr);
-        
+
         coins.add_coins(1000000);
         coins.add_coins(9000000);
         assert(coins.amount == 10000000, 'Should handle large amounts');
     }
-
 }

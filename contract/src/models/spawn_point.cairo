@@ -53,14 +53,9 @@ mod tests {
     #[test]
     fn test_spawn_point_creation() {
         let spawn = SpawnPoint {
-            spawn_id: 1_u32,
-            x: 100_u32,
-            y: 200_u32,
-            wave_id: 1_u32,
-            is_active: true,
-            delay: 0_u32,
+            spawn_id: 1_u32, x: 100_u32, y: 200_u32, wave_id: 1_u32, is_active: true, delay: 0_u32,
         };
-        
+
         assert(spawn.spawn_id == 1_u32, 'Wrong spawn id');
         assert(spawn.x == 100_u32, 'Wrong x position');
         assert(spawn.y == 200_u32, 'Wrong y position');
@@ -70,14 +65,9 @@ mod tests {
     #[test]
     fn test_position_setting() {
         let mut spawn = SpawnPoint {
-            spawn_id: 1_u32,
-            x: 100_u32,
-            y: 200_u32,
-            wave_id: 1_u32,
-            is_active: true,
-            delay: 0_u32,
+            spawn_id: 1_u32, x: 100_u32, y: 200_u32, wave_id: 1_u32, is_active: true, delay: 0_u32,
         };
-        
+
         SpawnPointImpl::set_position(ref spawn, 150_u32, 250_u32);
         let (x, y) = SpawnPointImpl::get_position(@spawn);
         assert(x == 150_u32, 'Wrong x after update');
@@ -87,12 +77,7 @@ mod tests {
     #[test]
     fn test_spawn_conditions() {
         let mut spawn = SpawnPoint {
-            spawn_id: 1_u32,
-            x: 100_u32,
-            y: 200_u32,
-            wave_id: 1_u32,
-            is_active: true,
-            delay: 0_u32,
+            spawn_id: 1_u32, x: 100_u32, y: 200_u32, wave_id: 1_u32, is_active: true, delay: 0_u32,
         };
 
         // Test active spawn point with no delay
