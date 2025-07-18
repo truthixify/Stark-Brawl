@@ -13,19 +13,23 @@ pub mod errors {
 #[derive(Drop, Serde, Clone)]
 #[dojo::model]
 pub struct Inventory {
-    #[key]
+    #[key]              
     pub id: u32,
-    pub items: Array<Item>,
-    pub max_capacity: u32,
-    pub is_set: bool,
+    pub items: Array<Item>,  
+    pub max_capacity: u32, 
+    pub is_set: bool  
 }
 
 #[generate_trait]
 pub impl InventoryImpl of InventoryTrait {
+
     // New inventory
     fn new(id: u32) -> Inventory {
-        Inventory {
-            id, items: ArrayTrait::new(), max_capacity: MAX_INVENTORY_CAPACITY, is_set: true,
+        Inventory { 
+            id,
+            items: ArrayTrait::new(),
+            max_capacity: MAX_INVENTORY_CAPACITY,
+            is_set: true
         }
     }
 
@@ -62,12 +66,12 @@ pub impl InventoryImpl of InventoryTrait {
                 break;
             }
 
-            let current_item = self.items.at(i);
+            let current_item = self.items.at(i); 
 
             if current_item.id != @item_id || found {
-                new_items.append(current_item.clone());
+                new_items.append(current_item.clone());  
             } else {
-                found = true;
+                found = true;  
             }
 
             i += 1;
@@ -79,6 +83,7 @@ pub impl InventoryImpl of InventoryTrait {
 
         found
     }
+
 }
 
 #[generate_trait]
@@ -97,7 +102,12 @@ pub impl InventoryAssert of AssertTrait {
 pub impl ZeroableInventoryTrait of Zero<Inventory> {
     #[inline(always)]
     fn zero() -> Inventory {
-        Inventory { id: 0, items: ArrayTrait::new(), max_capacity: 0, is_set: false }
+        Inventory { 
+            id: 0, 
+            items: ArrayTrait::new(),
+            max_capacity: 0,
+            is_set: false
+        }
     }
 
     #[inline(always)]
@@ -113,7 +123,10 @@ pub impl ZeroableInventoryTrait of Zero<Inventory> {
 
 #[cfg(test)]
 mod tests {
-    use super::{InventoryImpl, ItemImpl, MAX_INVENTORY_CAPACITY};
+    use super::{InventoryImpl, ItemImpl, 
+        MAX_INVENTORY_CAPACITY,
+    };
+    use stark_brawl::models::item::ItemType;
 
     #[test]
     fn test_new_inventory() {
@@ -127,7 +140,7 @@ mod tests {
     #[test]
     fn test_add_item() {
         let mut inventory = InventoryImpl::new(1);
-        let item = ItemImpl::new(1, "sword", "a basic sword", 100);
+        let item = ItemImpl::new(1, "sword", "a basic sword", 100, ItemType::Upgrade, true);
 
         assert(inventory.add_item(item), 'Should add item');
         assert(inventory.items.len() == 1, 'Should have one item');
@@ -137,7 +150,7 @@ mod tests {
     fn test_inventory_full() {
         let mut inventory = InventoryImpl::new(1);
 
-        let test_item = ItemImpl::new(1, "sword", "a basic sword", 100);
+        let test_item = ItemImpl::new(1, "sword", "a basic sword", 100, ItemType::Upgrade, true);
 
         let mut i = 0;
         loop {
@@ -159,7 +172,7 @@ mod tests {
     #[test]
     fn test_remove_item() {
         let mut inventory = InventoryImpl::new(1);
-        let item = ItemImpl::new(1, "sword", "a basic sword", 100);
+        let item = ItemImpl::new(1, "sword", "a basic sword", 100, ItemType::Upgrade, true);
 
         inventory.add_item(item);
         assert(inventory.remove_item(1), 'Should remove item');
@@ -169,12 +182,11 @@ mod tests {
     #[test]
     fn test_available_space() {
         let mut inventory = InventoryImpl::new(1);
-        let item = ItemImpl::new(1, "sword", "a basic sword", 100);
+        let item = ItemImpl::new(1, "sword", "a basic sword", 100, ItemType::Upgrade, true);
 
         assert(inventory.available_space() == MAX_INVENTORY_CAPACITY, 'Should be empty');
         inventory.add_item(item);
-        assert(
-            inventory.available_space() == MAX_INVENTORY_CAPACITY - 1, 'Should have one less space',
-        );
+        assert(inventory.available_space() == MAX_INVENTORY_CAPACITY - 1, 'Should have one less space');
     }
+
 }
