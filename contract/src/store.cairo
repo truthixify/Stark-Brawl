@@ -86,18 +86,19 @@ impl StoreImpl of StoreTrait {
 
     // Simple helpers to add coins and gems to player
     #[inline]
-    fn add_coins(ref self: Store, mut player: Player, amount: u32) -> Player {
-        let new_coins = player.coins + amount;
-        player.coins = new_coins;
-        self.write_player(@player);
-        player
-    }
+fn add_coins(ref self: Store, mut player: Player, amount: u64) -> Player {
+    let new_coins = player.coins + amount;
+    player.coins = new_coins;
+    self.write_player(@player);
+    player
+}
 
-    #[inline]
-    fn add_gems(ref self: Store, mut player: Player, amount: u32) -> Player {
-        let new_gems = player.gems + amount;
-        player.gems = new_gems;
-        self.write_player(@player);
-        player
-    }
+#[inline]
+fn add_gems(ref self: Store, mut player: Player, amount: u64) -> Player {
+    let new_gems = player.gems + amount;
+    player.gems = new_gems;
+    self.write_player(@player);
+    player
+}
+
 }
