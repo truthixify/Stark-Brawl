@@ -21,27 +21,37 @@ mod errors {
 
 #[generate_trait]
 pub trait ProjectileSystem {
-    fn new(id: u64, tower_id: u64, target_enemy_id: u64, damage: u32, speed: u32, x: u32, y: u32, target_x: u32, target_y: u32) -> Projectile;
+    fn new(
+        id: u64,
+        tower_id: u64,
+        target_enemy_id: u64,
+        damage: u32,
+        speed: u32,
+        x: u32,
+        y: u32,
+        target_x: u32,
+        target_y: u32,
+    ) -> Projectile;
     fn has_reached_target(self: @Projectile) -> bool;
 }
 
 impl ProjectileImpl of ProjectileSystem {
-    fn new(id: u64, tower_id: u64, target_enemy_id: u64, damage: u32, speed: u32, x: u32, y: u32, target_x: u32, target_y: u32) -> Projectile {
+    fn new(
+        id: u64,
+        tower_id: u64,
+        target_enemy_id: u64,
+        damage: u32,
+        speed: u32,
+        x: u32,
+        y: u32,
+        target_x: u32,
+        target_y: u32,
+    ) -> Projectile {
         if target_enemy_id == 0_u64 {
             panic(array![errors::InvalidTarget]);
         }
 
-        Projectile {
-            id,
-            tower_id,
-            target_enemy_id,
-            damage,
-            speed,
-            x,
-            y,
-            target_x,
-            target_y,
-        }
+        Projectile { id, tower_id, target_enemy_id, damage, speed, x, y, target_x, target_y }
     }
 
     fn has_reached_target(self: @Projectile) -> bool {
@@ -78,11 +88,7 @@ mod tests {
     use super::*;
 
     fn sample_projectile() -> Projectile {
-        ProjectileImpl::new(
-            1_u64, 10_u64, 50_u64, 25_u32, 3_u32,
-            0_u32, 0_u32,
-            5_u32, 5_u32
-        )
+        ProjectileImpl::new(1_u64, 10_u64, 50_u64, 25_u32, 3_u32, 0_u32, 0_u32, 5_u32, 5_u32)
     }
 
     #[test]
@@ -111,9 +117,7 @@ mod tests {
     #[should_panic]
     fn test_invalid_target_panics() {
         let _ = ProjectileImpl::new(
-            1_u64, 10_u64, 0_u64, 20_u32, 3_u32,
-            0_u32, 0_u32,
-            5_u32, 5_u32
+            1_u64, 10_u64, 0_u64, 20_u32, 3_u32, 0_u32, 0_u32, 5_u32, 5_u32,
         );
     }
 }

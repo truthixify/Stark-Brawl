@@ -29,15 +29,7 @@ pub trait TowerSystem {
 
 impl TowerImpl of TowerSystem {
     fn new(id: u64, owner: ContractAddress, tower_type: felt252, x: u32, y: u32) -> Tower {
-        Tower {
-            id,
-            owner,
-            tower_type,
-            level: 1_u8,
-            x,
-            y,
-            last_attack_tick: 0_u64,
-        }
+        Tower { id, owner, tower_type, level: 1_u8, x, y, last_attack_tick: 0_u64 }
     }
 
     fn upgrade(self: @Tower) -> Tower {
@@ -134,10 +126,7 @@ mod tests {
 
     #[test]
     fn test_can_attack_false() {
-        let t = Tower {
-            last_attack_tick: 18_u64,
-            ..sample_tower()
-        };
+        let t = Tower { last_attack_tick: 18_u64, ..sample_tower() };
         let ready = TowerImpl::can_attack(@t, 20_u64, 5_u64);
         assert(ready == false, 'Should not be ready');
     }

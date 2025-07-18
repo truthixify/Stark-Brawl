@@ -31,10 +31,7 @@ impl EnemyPathImpl of EnemyPathSystem {
     fn get_step(xs: Array<u32>, ys: Array<u32>, index: u32) -> EnemyPathStep {
         assert(index < xs.len(), errors::IndexOutOfBounds);
         let idx: usize = index.into();
-        EnemyPathStep {
-            x: *xs.at(idx),
-            y: *ys.at(idx),
-        }
+        EnemyPathStep { x: *xs.at(idx), y: *ys.at(idx) }
     }
 
     fn length(path: EnemyPath) -> u32 {
@@ -97,5 +94,4 @@ mod tests {
         let path = EnemyPathImpl::new(42_u64, xs.clone(), ys.clone());
         assert(path.length == 0_u32, 'ZeroLen');
     }
-
 }
