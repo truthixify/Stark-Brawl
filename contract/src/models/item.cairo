@@ -14,14 +14,20 @@ pub struct Item {
 pub enum ItemType {
     Trap,
     Upgrade,
-    Consumable
+    Consumable,
 }
 
 #[generate_trait]
 pub impl ItemImpl of ItemTrait {
-    
     #[inline(always)]
-    fn new(id: u32, name: ByteArray, description: ByteArray, value: u16, item_type: ItemType, usable: bool) -> Item {
+    fn new(
+        id: u32,
+        name: ByteArray,
+        description: ByteArray,
+        value: u16,
+        item_type: ItemType,
+        usable: bool,
+    ) -> Item {
         Item { id, name, description, value, item_type, usable }
     }
 
@@ -99,7 +105,6 @@ mod tests {
 
         item.update_value(40);
         assert(item.value == 40, 'VAL2');
-
     }
 
     fn update_value(ref self: Item, new_value: u16) {
