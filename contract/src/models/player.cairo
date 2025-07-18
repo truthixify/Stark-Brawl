@@ -14,7 +14,6 @@ pub struct Player {
     pub max_hp: u16,
     pub starks: u128,
 
-    // ✅ New fields for Tower Defense progression
     pub coins: u64,
     pub gems: u64,
     pub current_wave: u32,
@@ -44,7 +43,6 @@ pub impl PlayerImpl of PlayerTrait {
         self.hp = core::cmp::min(self.hp + amount, self.max_hp);
     }
 
-    // ✅ Fixed type mismatch (now using u16 literal)
     fn is_alive(self: @Player) -> bool {
         *self.hp > 0_u16
     }
@@ -92,7 +90,7 @@ pub impl ZeroablePlayerTrait of Zero<Player> {
     }
 }
 
-// ✅ Now public, so tests and systems can call it
+
 pub fn spawn_player(address: ContractAddress) -> Player {
     Player {
         address,
