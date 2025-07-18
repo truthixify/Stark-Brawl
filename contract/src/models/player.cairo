@@ -1,6 +1,7 @@
 // Imports
 use starknet::{ContractAddress, contract_address_const};
 use core::num::traits::zero::Zero;
+use core::option::Option;
 
 #[derive(Copy, Drop, Serde, IntrospectPacked, Debug)]
 #[dojo::model]
@@ -12,8 +13,12 @@ pub struct Player {
     pub hp: u16,
     pub max_hp: u16,
     pub starks: u128,
-    pub coins: u32,
-    pub gems: u32,
+
+    pub coins: u64,
+    pub gems: u64,
+    pub current_wave: u32,
+    pub equipped_ability: Option<u256>,
+    pub active_towers: u8,
 }
 
 pub fn ZERO_ADDRESS() -> ContractAddress {
@@ -54,6 +59,10 @@ pub impl PlayerImpl of PlayerTrait {
     fn spend_gems(ref self: Player, amount: u32) {
         assert(self.gems >= amount, 'Player: Not enough gems');
         self.gems -= amount;
+
+    fn is_alive(self: @Player) -> bool {
+        *self.hp > 0_u16
+
     }
 }
 
@@ -82,6 +91,9 @@ pub impl ZeroablePlayerTrait of Zero<Player> {
             starks: 0,
             coins: 0,
             gems: 0,
+            current_wave: 0,
+            equipped_ability: Option::None(()),
+            active_towers: 0,
         }
     }
 
@@ -97,18 +109,47 @@ pub impl ZeroablePlayerTrait of Zero<Player> {
 }
 
 pub fn spawn_player(address: ContractAddress) -> Player {
-    Player { address, level: 1, xp: 0, hp: 100, max_hp: 100, starks: 0, coins: 0, gems: 0 }
+
+    Player {
+        address,
+        level: 1,
+        xp: 0,
+        hp: 100,
+        max_hp: 100,
+        starks: 0,
+        coins: 0,
+        gems: 0,
+        current_wave: 1,
+        equipped_ability: Option::None(()),
+        active_towers: 0,
+    }
+
 }
 
 #[cfg(test)]
 mod tests {
     use super::{Player, ZeroablePlayerTrait, spawn_player, PlayerTrait};
+    use super::{Player, ZeroablePlayerTrait, PlayerImpl, spawn_player};
     use starknet::{ContractAddress, contract_address_const};
 
     #[test]
     fn test_player_initialization() {
         let addr: ContractAddress = contract_address_const::<0x123>();
         let player = spawn_player(addr);
+
+        let player = Player {
+            address: addr,
+            level: 1,
+            xp: 0,
+            hp: 100,
+            max_hp: 100,
+            starks: 0,
+            coins: 50,
+            gems: 10,
+            current_wave: 2,
+            equipped_ability: Option::None(()),
+            active_towers: 1,
+        };
 
         assert(player.address == addr, 'Address mismatch');
         assert(player.level == 1, 'Invalid level');
@@ -142,12 +183,17 @@ mod tests {
 
         assert(player.coins == 60_u32, 'Coins not spent correctly');
         assert(player.gems == 6_u32, 'Gems not spent correctly');
+        assert(player.coins == 50, 'Invalid coins');
+        assert(player.gems == 10, 'Invalid gems');
+        assert(player.current_wave == 2, 'Invalid wave');
     }
 
     #[test]
     fn test_zero_player() {
         let zero_player = ZeroablePlayerTrait::zero();
         assert(zero_player.is_zero(), 'Should be zero');
+        assert(zero_player.coins == 0, 'Coins should be zero');
+        assert(zero_player.equipped_ability.is_none(), 'Ability should be none');
     }
 
     #[test]
@@ -155,5 +201,17 @@ mod tests {
         let addr: ContractAddress = contract_address_const::<0xABC>();
         let player = spawn_player(addr);
         assert(player.is_non_zero(), 'Should be non-zero');
+        assert(player.current_wave == 1, 'Wave should be initialized at 1');
+    }
+
+    #[test]
+    fn test_is_alive() {
+        let addr: ContractAddress = contract_address_const::<0xDEF>();
+        let mut player = spawn_player(addr);
+
+        assert(player.is_alive(), 'Player should be alive');
+
+        player.take_damage(150);
+        assert(!player.is_alive(), 'Player should be dead');
     }
 }
