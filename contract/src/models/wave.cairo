@@ -90,7 +90,7 @@ impl WaveImpl of WaveSystem {
         }
 
         // Check if enough ticks have passed since the last spawn
-        current_tick >= *self.last_spawn_tick + (*self.tick_interval as u64)
+      current_tick >= *self.last_spawn_tick + (*self.tick_interval).into()
     }
 
     fn register_spawn(self: @Wave, current_tick: u64) -> Wave {

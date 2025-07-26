@@ -14,7 +14,7 @@ pub struct SpawnPoint {
 
 pub mod errors {
     pub const INVALID_POSITION: felt252 = 'SpawnPoint: Invalid position';
-    pub const INACTIVE_SPAWN: felt252 = 'SpawnPoint: Spawn point inactive';
+    pub const INACTIVE_SPAWN: felt252 = 'SpawnPoint: Spawn point';
 }
 
 #[generate_trait]
