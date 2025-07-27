@@ -24,7 +24,8 @@ pub mod models {
     pub mod leaderboard;
     pub mod reward_pool;   
     pub mod spawn_point;   
-    pub mod wave; 
+    pub mod wave;
+    pub mod wave_progress; 
 }
 
 mod store;
@@ -33,5 +34,6 @@ mod store;
 pub mod tests {
     pub mod test_trap;
     pub mod test_map_tile;
+    pub mod test_wave_progress;
 }
 
