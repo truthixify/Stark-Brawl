@@ -22,10 +22,10 @@ pub mod models {
     pub mod projectile;
     pub mod enemy_path;
     pub mod leaderboard;
-    pub mod reward_pool;   
-    pub mod spawn_point;   
+    pub mod reward_pool;
+    pub mod spawn_point;
     pub mod wave;
-    pub mod wave_progress; 
+    pub mod wave_progress;
 }
 
 mod store;
