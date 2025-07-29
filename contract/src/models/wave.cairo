@@ -14,7 +14,7 @@ pub struct Wave {
     pub is_completed: bool,
 }
 
-mod errors {
+pub mod errors {
     pub const AlreadyActive: felt252 = 'Wave already active';
     pub const NotActive: felt252 = 'Wave not active';
     pub const AlreadyCompleted: felt252 = 'Wave already completed';
@@ -32,7 +32,7 @@ pub trait WaveSystem {
     fn is_wave_completed(self: @Wave) -> bool;
 }
 
-impl WaveImpl of WaveSystem {
+pub impl WaveImpl of WaveSystem {
     fn new(id: u64, level: u32, enemy_count: u32, tick_interval: u32) -> Wave {
         assert(enemy_count > 0, errors::InvalidEnemyCount);
         

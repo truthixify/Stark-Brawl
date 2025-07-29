@@ -37,7 +37,7 @@ pub trait EnemySystem {
     fn move_to(self: @Enemy, x: u32, y: u32) -> Enemy;
 }
 
-impl EnemyImpl of EnemySystem {
+pub impl EnemyImpl of EnemySystem {
     fn new(
         id: u64,
         enemy_type: felt252,
