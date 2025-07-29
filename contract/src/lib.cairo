@@ -32,5 +32,6 @@ mod store;
 pub mod tests {
     pub mod test_trap;
     pub mod test_map_tile;
+    pub mod test_store;
     pub mod test_path_system;
 }

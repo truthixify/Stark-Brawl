@@ -4,14 +4,16 @@ use stark_brawl::models::inventory::{Inventory, InventoryImpl};
 use stark_brawl::models::item::Item;
 use stark_brawl::models::tower_stats::TowerStats;
 use stark_brawl::models::player::{Player, PlayerImpl};
+use stark_brawl::models::wave::{errors, Wave, WaveImpl, ZeroableWave};
+use stark_brawl::models::enemy::{Enemy, EnemyImpl, ZeroableEnemy};
 
 #[derive(Drop)]
-struct Store {
+pub struct Store {
     world: WorldStorage,
 }
 
 #[generate_trait]
-impl StoreImpl of StoreTrait {
+pub impl StoreImpl of StoreTrait {
     #[inline(always)]
     fn new(world: WorldStorage) -> Store {
         Store { world: world }
@@ -82,6 +84,85 @@ impl StoreImpl of StoreTrait {
     #[inline]
     fn write_player(ref self: Store, player: @Player) {
         self.world.write_model(player);
+    }
+
+    // -------------------------------
+    // Wave operations (NEW)
+    // -------------------------------
+    #[inline]
+    fn read_wave(self: @Store, wave_id: u64) -> Wave {
+        let wave: Wave = self.world.read_model(wave_id);
+        assert(wave.is_non_zero(), 'Wave not found');
+        wave
+    }
+
+    #[inline]
+    fn write_wave(ref self: Store, wave: @Wave) {
+        self.world.write_model(wave);
+        // self.emit(Event::WaveStored { wave_id: *wave.id });
+    }
+
+    #[inline]
+    fn start_wave(ref self: Store, wave_id: u64, current_tick: u64) {
+        let mut wave = self.read_wave(wave_id);
+        assert(wave.is_active == false, errors::AlreadyActive);
+        assert(wave.is_completed == false, errors::AlreadyCompleted);
+        let started_wave = WaveImpl::start(@wave, current_tick);
+        self.write_wave(@started_wave)
+    }
+
+    #[inline]
+    fn register_enemy_spawn(ref self: Store, wave_id: u64, current_tick: u64) {
+        let wave = self.read_wave(wave_id);
+        assert(WaveImpl::should_spawn(@wave, current_tick) == true, errors::InvalidSpawnTick);
+        let spawned_wave = WaveImpl::register_spawn(@wave, current_tick);
+        self.write_wave(@spawned_wave)
+
+    }
+
+    #[inline]
+    fn complete_wave(ref self: Store, wave_id: u64) {
+        let mut wave = self.read_wave(wave_id);
+        assert(wave.is_active == true, errors::NotActive);
+        let completed_wave = WaveImpl::complete(@wave);
+        self.write_wave(@completed_wave)
+    }
+
+    // -------------------------------
+    // Enemy operations (NEW)
+    // -------------------------------
+    #[inline]
+    fn read_enemy(self: @Store, enemy_id: u64) -> Enemy {
+        let enemy: Enemy = self.world.read_model(enemy_id);
+        assert(enemy.is_non_zero(), 'Enemy id not found');
+        enemy
+    }
+
+    #[inline]
+    fn write_enemy(ref self: Store, enemy: @Enemy) {
+        self.world.write_model(enemy);
+    }
+
+    #[inline]
+    fn spawn_enemy(ref self: Store, enemy: Enemy) {
+        assert(enemy.is_zero() == false, 'Enemy is not initialized');
+        self.write_enemy(@enemy)
+    }
+
+    #[inline]
+    fn update_enemy_health(ref self: Store, enemy_id: u64, damage: u32) {
+        let enemy: Enemy = self.read_enemy(enemy_id);
+        assert(enemy.is_alive == true, 'Enemy is dead');
+        let damaged_enemy = EnemyImpl::take_damage(@enemy, damage);
+        self.write_enemy(@damaged_enemy);
+    }
+
+    #[inline]
+    fn move_enemy(ref self: Store, enemy_id: u64, x: u32, y: u32) {
+        let enemy: Enemy = self.read_enemy(enemy_id);
+        assert(enemy.is_alive == true, 'Enemy is dead');
+        let moved_enemy = EnemyImpl::move_to(@enemy, x, y);
+        self.write_enemy(@moved_enemy);
     }
 
     // Simple helpers to add coins and gems to player
