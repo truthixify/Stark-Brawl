@@ -20,11 +20,10 @@ pub mod models {
     pub mod tower;
     pub mod enemy;
     pub mod projectile;
-    pub mod enemy_path;
     pub mod leaderboard;
-    pub mod reward_pool;   
-    pub mod spawn_point;   
-    pub mod wave; 
+    pub mod reward_pool;
+    pub mod spawn_point;
+    pub mod wave;
 }
 
 mod store;
@@ -34,5 +33,5 @@ pub mod tests {
     pub mod test_trap;
     pub mod test_map_tile;
     pub mod test_store;
+    pub mod test_path_system;
 }
-
