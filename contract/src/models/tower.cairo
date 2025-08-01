@@ -15,7 +15,7 @@ pub struct Tower {
     pub last_attack_tick: u64,
 }
 
-mod errors {
+pub mod errors {
     pub const Unauthorized: felt252 = 'Unauthorized';
     pub const MaxLevelReached: felt252 = 'MaxLevelReached';
 }

@@ -3,11 +3,11 @@ use dojo::world::WorldStorage;
 use stark_brawl::models::inventory::{Inventory, InventoryImpl};
 use stark_brawl::models::item::Item;
 use stark_brawl::models::tower_stats::TowerStats;
-use stark_brawl::models::player::{Player, PlayerImpl};
-use stark_brawl::models::wave::{errors, Wave, WaveImpl, ZeroableWave};
-use stark_brawl::models::enemy::{Enemy, EnemyImpl, ZeroableEnemy};
-use stark_brawl::models::tower::{Tower, TowerImpl, ZeroableTower};
+use stark_brawl::models::tower::{errors as TowerErrors, Tower, TowerImpl, ZeroableTower};
 use stark_brawl::models::trap::{Trap, TrapImpl, ZeroableTrapTrait, Vec2};
+use stark_brawl::models::player::{Player, PlayerImpl};
+use stark_brawl::models::wave::{errors as WaveErrors, Wave, WaveImpl, ZeroableWave};
+use stark_brawl::models::enemy::{Enemy, EnemyImpl, ZeroableEnemy};
 
 #[derive(Drop)]
 pub struct Store {
@@ -22,7 +22,7 @@ pub impl StoreImpl of StoreTrait {
     }
 
     // -------------------------------
-    // Tower operations
+    // TowerStats operations
     // -------------------------------
     #[inline]
     fn get_tower_stats(self: Store, tower_type: felt252, level: u8) -> TowerStats {
@@ -107,8 +107,8 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn start_wave(ref self: Store, wave_id: u64, current_tick: u64) {
         let mut wave = self.read_wave(wave_id);
-        assert(wave.is_active == false, errors::AlreadyActive);
-        assert(wave.is_completed == false, errors::AlreadyCompleted);
+        assert(wave.is_active == false, WaveErrors::AlreadyActive);
+        assert(wave.is_completed == false, WaveErrors::AlreadyCompleted);
         let started_wave = WaveImpl::start(@wave, current_tick);
         self.write_wave(@started_wave)
     }
@@ -116,7 +116,7 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn register_enemy_spawn(ref self: Store, wave_id: u64, current_tick: u64) {
         let wave = self.read_wave(wave_id);
-        assert(WaveImpl::should_spawn(@wave, current_tick) == true, errors::InvalidSpawnTick);
+        assert(WaveImpl::should_spawn(@wave, current_tick) == true, WaveErrors::InvalidSpawnTick);
         let spawned_wave = WaveImpl::register_spawn(@wave, current_tick);
         self.write_wave(@spawned_wave)
 
@@ -125,7 +125,7 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn complete_wave(ref self: Store, wave_id: u64) {
         let mut wave = self.read_wave(wave_id);
-        assert(wave.is_active == true, errors::NotActive);
+        assert(wave.is_active == true, WaveErrors::NotActive);
         let completed_wave = WaveImpl::complete(@wave);
         self.write_wave(@completed_wave)
     }
@@ -185,7 +185,7 @@ pub impl StoreImpl of StoreTrait {
     }
 
     // -------------------------------
-    // Tower Management operations
+    // Tower operations
     // -------------------------------
     #[inline]
     fn read_tower(self: @Store, tower_id: u64) -> Tower {
@@ -208,7 +208,7 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn upgrade_tower(ref self: Store, tower_id: u64) {
         let tower = self.read_tower(tower_id);
-        assert(tower.level < 5, 'Max level reached');
+        assert(tower.level < 5, TowerErrors::MaxLevelReached);
         let upgraded_tower = TowerImpl::upgrade(@tower);
         self.write_tower(@upgraded_tower)
     }
@@ -221,7 +221,7 @@ pub impl StoreImpl of StoreTrait {
     }
 
     // -------------------------------
-    // Trap Management operations
+    // Trap operations
     // -------------------------------
     #[inline]
     fn read_trap(self: @Store, trap_id: u32) -> Trap {

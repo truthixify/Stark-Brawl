@@ -6,8 +6,8 @@ mod tests {
     };
     use dojo::world::{WorldStorage};
 
-    use stark_brawl::models::trap::{Trap, TrapTrait, TrapType, ZeroableTrapTrait, Vec2, create_trap};
     use stark_brawl::models::tower::{Tower, TowerImpl, ZeroableTower};
+    use stark_brawl::models::trap::{Trap, TrapTrait, TrapType, ZeroableTrapTrait, Vec2, create_trap};
     use stark_brawl::models::wave::{Wave, WaveImpl};
     use stark_brawl::models::enemy::{Enemy, EnemyImpl};
     use stark_brawl::store::{Store, StoreTrait};
@@ -20,8 +20,8 @@ mod tests {
     use stark_brawl::models::wave::{m_Wave};
     use stark_brawl::models::enemy::{m_Enemy};
     use stark_brawl::models::tower::{m_Tower};
-    use stark_brawl::models::trap::{m_Trap};
     use stark_brawl::models::tower_stats::{m_TowerStats};
+    use stark_brawl::models::trap::{m_Trap};
     use stark_brawl::models::item::{m_Item};
     use stark_brawl::models::inventory::{m_Inventory};
     use stark_brawl::models::player::{m_Player};
@@ -365,7 +365,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('Max level reached',))]
+    #[should_panic(expected: ('MaxLevelReached',))]
     fn test_store_upgrade_tower_past_max_level() {
         let world = create_test_world();
         let mut store: Store = StoreTrait::new(world);
