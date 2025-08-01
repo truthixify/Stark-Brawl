@@ -32,8 +32,8 @@ pub impl StatisticsImpl of StatisticsTrait {
         if *self.matches_played == 0 {
             return 0;
         }
-        let matches = *self.matches_played;
-        let wins = *self.wins;
+        let matches: u32 = (*self.matches_played).into();
+        let wins: u32 = (*self.wins).into();
         let rate = (wins * 100) / matches;
         rate.into()
     }
