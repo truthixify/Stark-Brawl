@@ -9,7 +9,10 @@ mod tests {
     use stark_brawl::models::trap::{TrapTrait, ZeroableTrapTrait};
     use stark_brawl::models::wave::{Wave, WaveImpl};
     use stark_brawl::models::enemy::{Enemy, EnemyImpl};
+    use stark_brawl::models::leaderboard::{LeaderboardEntry, LeaderboardImpl, ZeroableLeaderboardEntry};
+    use stark_brawl::models::statistics::{Statistics, StatisticsImpl, ZeroableStatistics};
     use stark_brawl::store::{Store, StoreTrait};
+    use starknet::{ContractAddress, contract_address_const};
 
     // System imports
     use stark_brawl::systems::game::{brawl_game};
@@ -22,6 +25,8 @@ mod tests {
     use stark_brawl::models::item::{m_Item};
     use stark_brawl::models::inventory::{m_Inventory};
     use stark_brawl::models::player::{m_Player};
+    use stark_brawl::models::statistics::{m_Statistics};
+    use stark_brawl::models::leaderboard::{m_LeaderboardEntry};
 
     pub fn namespace_def() -> NamespaceDef {
         let ndef = NamespaceDef {
@@ -34,6 +39,8 @@ mod tests {
                 TestResource::Model(m_Item::TEST_CLASS_HASH),
                 TestResource::Model(m_Inventory::TEST_CLASS_HASH),
                 TestResource::Model(m_Player::TEST_CLASS_HASH),
+                TestResource::Model(m_Statistics::TEST_CLASS_HASH),
+                TestResource::Model(m_LeaderboardEntry::TEST_CLASS_HASH),
                 TestResource::Contract(brawl_game::TEST_CLASS_HASH),
             ].span(),
         };
@@ -68,6 +75,23 @@ mod tests {
 
     fn create_sample_enemy() -> Enemy {
         EnemyImpl::new(1_u64, 'goblin', 100_u32, 5_u32, 10_u32, 20_u32, 10_u32, 50_u32)
+    }
+
+    fn create_sample_leaderboard_entry() -> LeaderboardEntry {
+        LeaderboardEntry {
+            player_id: contract_address_const::<0x123>(),
+            kills: 10_u32,
+            deaths: 2_u32,
+        }
+    }
+
+    fn create_sample_statistics() -> Statistics {
+        Statistics {
+            player_id: 'player1',
+            matches_played: 5_u8,
+            wins: 3_u8,
+            defeats: 2_u8,
+        }
     }
 
     #[test]
@@ -298,5 +322,320 @@ mod tests {
 
         store.update_enemy_health(1_u64, 100_u32);
         store.update_enemy_health(1_u64, 10_u32);
+    }
+
+    // -------------------------------
+    // Leaderboard Management Tests
+    // -------------------------------
+    #[test]
+    fn test_store_write_read_leaderboard_entry() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let entry = create_sample_leaderboard_entry();
+        store.write_leaderboard_entry(@entry);
+
+        let stored_entry = store.read_leaderboard_entry(contract_address_const::<0x123>());
+
+        assert(stored_entry.player_id == contract_address_const::<0x123>(), 'Invalid player_id');
+        assert(stored_entry.kills == 10_u32, 'Invalid kills');
+        assert(stored_entry.deaths == 2_u32, 'Invalid deaths');
+        assert(stored_entry.is_valid(), 'Entry should be valid');
+    }
+
+    #[test]
+    fn test_store_update_leaderboard_new_entry() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = contract_address_const::<0x456>();
+        
+        // Should create new entry if none exists
+        store.update_leaderboard(player_id, 5_u32, 1_u32);
+
+        let entry = store.read_leaderboard_entry(player_id);
+        assert(entry.player_id == player_id, 'Should create new entry');
+        assert(entry.kills == 5_u32, 'Should have 5 kills');
+        assert(entry.deaths == 1_u32, 'Should have 1 death');
+        assert(entry.is_valid(), 'New entry should be valid');
+    }
+
+    #[test]
+    fn test_store_update_leaderboard_existing_entry() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = contract_address_const::<0x123>();
+        let initial_entry = create_sample_leaderboard_entry();
+        store.write_leaderboard_entry(@initial_entry);
+
+        // Should increment existing kills and deaths
+        store.update_leaderboard(player_id, 3_u32, 1_u32);
+
+        let updated_entry = store.read_leaderboard_entry(player_id);
+        assert(updated_entry.kills == 13_u32, 'Should have 13 kills total');
+        assert(updated_entry.deaths == 3_u32, 'Should have 3 deaths total');
+        assert(updated_entry.is_valid(), 'Updated entry should be valid');
+    }
+
+    #[test]
+    fn test_store_update_leaderboard_multiple_updates() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = contract_address_const::<0x789>();
+
+        // Multiple updates to same player
+        store.update_leaderboard(player_id, 10_u32, 2_u32);
+        store.update_leaderboard(player_id, 5_u32, 1_u32);
+        store.update_leaderboard(player_id, 2_u32, 0_u32);
+
+        let final_entry = store.read_leaderboard_entry(player_id);
+        assert(final_entry.kills == 17_u32, 'Should have 17 total kills');
+        assert(final_entry.deaths == 3_u32, 'Should have 3 total deaths');
+        assert(final_entry.is_valid(), 'Final entry should be valid');
+    }
+
+    #[test]
+    #[should_panic(expected: ('Invalid leaderboard entry',))]
+    fn test_store_update_leaderboard_exceed_kills_limit() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = contract_address_const::<0xABC>();
+        
+        // Should panic when kills exceed 1000
+        store.update_leaderboard(player_id, 1001_u32, 10_u32);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Invalid leaderboard entry',))]
+    fn test_store_update_leaderboard_exceed_deaths_limit() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = contract_address_const::<0xDEF>();
+        
+        // Should panic when deaths exceed 1000
+        store.update_leaderboard(player_id, 100_u32, 1001_u32);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Invalid leaderboard entry',))]
+    fn test_store_update_leaderboard_cumulative_exceed_limit() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = contract_address_const::<0x999>();
+
+        // First update is valid
+        store.update_leaderboard(player_id, 900_u32, 900_u32);
+        
+        // Second update should push over limit and panic
+        store.update_leaderboard(player_id, 200_u32, 50_u32);
+    }
+
+    #[test]
+    fn test_store_update_leaderboard_at_limit() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = contract_address_const::<0x888>();
+
+        // Test exact limit values
+        store.update_leaderboard(player_id, 1000_u32, 1000_u32);
+
+        let entry = store.read_leaderboard_entry(player_id);
+        assert(entry.kills == 1000_u32, 'Should have exactly 1000 kills');
+        assert(entry.deaths == 1000_u32, 'Should have exactly 1000 deaths');
+        assert(entry.is_valid(), 'Entry at limit should be valid');
+    }
+
+    #[test]
+    fn test_store_read_nonexistent_leaderboard_entry() {
+        let world = create_test_world();
+        let store: Store = StoreTrait::new(world);
+
+        let player_id = contract_address_const::<0x000>();
+        let entry = store.read_leaderboard_entry(player_id);
+        
+        // Should return zero entry for non-existent players
+        assert(entry.is_zero(), 'Should be zero entry');
+        assert(entry.kills == 0_u32, 'Should have 0 kills');
+        assert(entry.deaths == 0_u32, 'Should have 0 deaths');
+    }
+
+    // -------------------------------
+    // Statistics Management Tests
+    // -------------------------------
+    #[test]
+    fn test_store_write_read_statistics() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let stats = create_sample_statistics();
+        store.write_statistics(@stats);
+
+        let stored_stats = store.read_statistics('player1');
+
+        assert(stored_stats.player_id == 'player1', 'Invalid player_id');
+        assert(stored_stats.matches_played == 5_u8, 'Invalid matches_played');
+        assert(stored_stats.wins == 3_u8, 'Invalid wins');
+        assert(stored_stats.defeats == 2_u8, 'Invalid defeats');
+        assert(stored_stats.is_non_zero(), 'Stats should be non-zero');
+    }
+
+    #[test]
+    fn test_store_increment_match_result_new_player_win() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = 'newplayer1';
+        
+        // Should create new stats if none exist
+        store.increment_match_result(player_id, true);
+
+        let stats = store.read_statistics(player_id);
+        assert(stats.player_id == player_id, 'Should create new stats');
+        assert(stats.matches_played == 1_u8, 'Should have 1 match played');
+        assert(stats.wins == 1_u8, 'Should have 1 win');
+        assert(stats.defeats == 0_u8, 'Should have 0 defeats');
+        assert(stats.is_non_zero(), 'New stats should be non-zero');
+    }
+
+    #[test]
+    fn test_store_increment_match_result_new_player_defeat() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = 'newplayer2';
+        
+        // Should create new stats for defeat
+        store.increment_match_result(player_id, false);
+
+        let stats = store.read_statistics(player_id);
+        assert(stats.player_id == player_id, 'Should create new stats');
+        assert(stats.matches_played == 1_u8, 'Should have 1 match played');
+        assert(stats.wins == 0_u8, 'Should have 0 wins');
+        assert(stats.defeats == 1_u8, 'Should have 1 defeat');
+        assert(stats.is_non_zero(), 'New stats should be non-zero');
+    }
+
+    #[test]
+    fn test_store_increment_match_result_existing_player() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = 'player1';
+        let initial_stats = create_sample_statistics();
+        store.write_statistics(@initial_stats);
+
+        // Increment with a win
+        store.increment_match_result(player_id, true);
+
+        let updated_stats = store.read_statistics(player_id);
+        assert(updated_stats.matches_played == 6_u8, 'Should have 6 matches played');
+        assert(updated_stats.wins == 4_u8, 'Should have 4 wins');
+        assert(updated_stats.defeats == 2_u8, 'Should still have 2 defeats');
+    }
+
+    #[test]
+    fn test_store_increment_match_result_multiple_results() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = 'player3';
+
+        // Multiple match results
+        store.increment_match_result(player_id, true);   // Win
+        store.increment_match_result(player_id, false);  // Defeat
+        store.increment_match_result(player_id, true);   // Win
+        store.increment_match_result(player_id, true);   // Win
+        store.increment_match_result(player_id, false);  // Defeat
+
+        let final_stats = store.read_statistics(player_id);
+        assert(final_stats.matches_played == 5_u8, 'Should have 5 matches played');
+        assert(final_stats.wins == 3_u8, 'Should have 3 wins');
+        assert(final_stats.defeats == 2_u8, 'Should have 2 defeats');
+    }
+
+    #[test]
+    fn test_store_increment_match_result_win_rate_calculation() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = 'player4';
+
+        // Create scenario for 75% win rate (3 wins out of 4 matches)
+        store.increment_match_result(player_id, true);   // Win
+        store.increment_match_result(player_id, true);   // Win
+        store.increment_match_result(player_id, true);   // Win
+        store.increment_match_result(player_id, false);  // Defeat
+
+        let stats = store.read_statistics(player_id);
+        let win_rate = StatisticsImpl::get_win_rate(@stats);
+        assert(win_rate == 75, 'Win rate should be 75%');
+    }
+
+    #[test]
+    fn test_store_increment_match_result_alternating_results() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        let player_id = 'player5';
+
+        // Alternating wins and defeats
+        store.increment_match_result(player_id, true);   // Win
+        store.increment_match_result(player_id, false);  // Defeat
+        store.increment_match_result(player_id, true);   // Win
+        store.increment_match_result(player_id, false);  // Defeat
+
+        let stats = store.read_statistics(player_id);
+        assert(stats.matches_played == 4_u8, 'Should have 4 matches played');
+        assert(stats.wins == 2_u8, 'Should have 2 wins');
+        assert(stats.defeats == 2_u8, 'Should have 2 defeats');
+        
+        let win_rate = StatisticsImpl::get_win_rate(@stats);
+        assert(win_rate == 50, 'Win rate should be 50%');
+    }
+
+    #[test]
+    fn test_store_read_nonexistent_statistics() {
+        let world = create_test_world();
+        let store: Store = StoreTrait::new(world);
+
+        let player_id = 'nonexistent';
+        let stats = store.read_statistics(player_id);
+        
+        // Should return zero stats for non-existent players
+        assert(stats.is_zero(), 'Should be zero stats');
+        assert(stats.matches_played == 0_u8, 'Should have 0 matches');
+        assert(stats.wins == 0_u8, 'Should have 0 wins');
+        assert(stats.defeats == 0_u8, 'Should have 0 defeats');
+    }
+
+    #[test]
+    fn test_store_statistics_different_players() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        // Test multiple different players
+        store.increment_match_result('playerA', true);
+        store.increment_match_result('playerB', false);
+        store.increment_match_result('playerA', true);
+        store.increment_match_result('playerC', true);
+
+        let statsA = store.read_statistics('playerA');
+        let statsB = store.read_statistics('playerB');
+        let statsC = store.read_statistics('playerC');
+
+        assert(statsA.matches_played == 2_u8, 'Player A: 2 matches');
+        assert(statsA.wins == 2_u8, 'Player A: 2 wins');
+        assert(statsA.defeats == 0_u8, 'Player A: 0 defeat');
+        assert(statsB.matches_played == 1_u8, 'Player B: 1 match');
+        assert(statsB.wins == 0_u8, 'Player B: 0 wins');
+        assert(statsB.defeats == 1_u8, 'Player B: 1 defeat');
+        assert(statsC.matches_played == 1_u8, 'Player C: 1 match');
+        assert(statsC.wins == 1_u8, 'Player C: 1 win');
     }
 }
