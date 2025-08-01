@@ -6,6 +6,8 @@ use stark_brawl::models::tower_stats::TowerStats;
 use stark_brawl::models::player::{Player, PlayerImpl};
 use stark_brawl::models::wave::{errors, Wave, WaveImpl, ZeroableWave};
 use stark_brawl::models::enemy::{Enemy, EnemyImpl, ZeroableEnemy};
+use stark_brawl::models::tower::{Tower, TowerImpl, ZeroableTower};
+use stark_brawl::models::trap::{Trap, TrapImpl, ZeroableTrapTrait, Vec2};
 
 #[derive(Drop)]
 pub struct Store {
@@ -74,7 +76,7 @@ pub impl StoreImpl of StoreTrait {
     }
 
     // -------------------------------
-    // Player operations (NEW)
+    // Player operations 
     // -------------------------------
     #[inline]
     fn read_player(self: Store, player_id: felt252) -> Player {
@@ -87,7 +89,7 @@ pub impl StoreImpl of StoreTrait {
     }
 
     // -------------------------------
-    // Wave operations (NEW)
+    // Wave operations
     // -------------------------------
     #[inline]
     fn read_wave(self: @Store, wave_id: u64) -> Wave {
@@ -129,7 +131,7 @@ pub impl StoreImpl of StoreTrait {
     }
 
     // -------------------------------
-    // Enemy operations (NEW)
+    // Enemy operations
     // -------------------------------
     #[inline]
     fn read_enemy(self: @Store, enemy_id: u64) -> Enemy {
@@ -167,19 +169,100 @@ pub impl StoreImpl of StoreTrait {
 
     // Simple helpers to add coins and gems to player
     #[inline]
-fn add_coins(ref self: Store, mut player: Player, amount: u64) -> Player {
-    let new_coins = player.coins + amount;
-    player.coins = new_coins;
-    self.write_player(@player);
-    player
-}
+    fn add_coins(ref self: Store, mut player: Player, amount: u64) -> Player {
+        let new_coins = player.coins + amount;
+        player.coins = new_coins;
+        self.write_player(@player);
+        player
+    }
 
-#[inline]
-fn add_gems(ref self: Store, mut player: Player, amount: u64) -> Player {
-    let new_gems = player.gems + amount;
-    player.gems = new_gems;
-    self.write_player(@player);
-    player
-}
+    #[inline]
+    fn add_gems(ref self: Store, mut player: Player, amount: u64) -> Player {
+        let new_gems = player.gems + amount;
+        player.gems = new_gems;
+        self.write_player(@player);
+        player
+    }
+
+    // -------------------------------
+    // Tower Management operations
+    // -------------------------------
+    #[inline]
+    fn read_tower(self: @Store, tower_id: u64) -> Tower {
+        let tower: Tower = self.world.read_model(tower_id);
+        assert(tower.is_non_zero(), 'Tower not found');
+        tower
+    }
+
+    #[inline]
+    fn write_tower(ref self: Store, tower: @Tower) {
+        self.world.write_model(tower);
+    }
+
+    #[inline]
+    fn place_tower(ref self: Store, tower: Tower) {
+        assert(tower.is_zero() == false, 'Tower not initialized');
+        self.write_tower(@tower)
+    }
+
+    #[inline]
+    fn upgrade_tower(ref self: Store, tower_id: u64) {
+        let tower = self.read_tower(tower_id);
+        assert(tower.level < 5, 'Max level reached');
+        let upgraded_tower = TowerImpl::upgrade(@tower);
+        self.write_tower(@upgraded_tower)
+    }
+
+    #[inline]
+    fn can_tower_attack(self: @Store, tower_id: u64, current_tick: u64, cooldown: u64) -> bool {
+        let tower = self.read_tower(tower_id);
+        assert(tower.is_zero() == false, 'Tower not initialized');
+        TowerImpl::can_attack(@tower, current_tick, cooldown)
+    }
+
+    // -------------------------------
+    // Trap Management operations
+    // -------------------------------
+    #[inline]
+    fn read_trap(self: @Store, trap_id: u32) -> Trap {
+        let trap: Trap = self.world.read_model(trap_id);
+        assert(trap.is_non_zero(), 'Trap not found');
+        trap
+    }
+
+    #[inline]
+    fn write_trap(ref self: Store, trap: @Trap) {
+        self.world.write_model(trap);
+    }
+
+    #[inline]
+    fn place_trap(ref self: Store, trap: Trap) {
+        assert(trap.is_zero() == false, 'Trap not initialized');
+        self.write_trap(@trap)
+    }
+
+    #[inline]
+    fn trigger_trap(ref self: Store, trap_id: u32, enemy_pos: Vec2) -> u16 {
+        let mut trap = self.read_trap(trap_id);
+        assert(trap.is_active == true, 'Trap not active');
+        assert(TrapImpl::check_trigger(@trap, enemy_pos) == true, 'Enemy not in range');
+        let damage = TrapImpl::trigger(ref trap);
+        self.write_trap(@trap);
+        damage
+    }
+
+    #[inline]
+    fn deactivate_trap(ref self: Store, trap_id: u32) {
+        let mut trap = self.read_trap(trap_id);
+        TrapImpl::deactivate(ref trap);
+        self.write_trap(@trap)
+    }
+
+    #[inline]
+    fn reactivate_trap(ref self: Store, trap_id: u32) {
+        let mut trap = self.read_trap(trap_id);
+        TrapImpl::activate(ref trap);
+        self.write_trap(@trap)
+    }
 
 }
