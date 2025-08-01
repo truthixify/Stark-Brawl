@@ -27,7 +27,7 @@ pub trait TowerSystem {
     fn can_attack(self: @Tower, current_tick: u64, cooldown: u64) -> bool;
 }
 
-impl TowerImpl of TowerSystem {
+pub impl TowerImpl of TowerSystem {
     fn new(id: u64, owner: ContractAddress, tower_type: felt252, x: u32, y: u32) -> Tower {
         Tower { id, owner, tower_type, level: 1_u8, x, y, last_attack_tick: 0_u64 }
     }

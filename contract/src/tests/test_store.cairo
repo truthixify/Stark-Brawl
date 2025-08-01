@@ -6,7 +6,7 @@ mod tests {
     };
     use dojo::world::{WorldStorage};
 
-    use stark_brawl::models::trap::{TrapTrait, ZeroableTrapTrait, Vec2, TrapType, create_trap};
+    use stark_brawl::models::trap::{Trap, TrapTrait, TrapType, ZeroableTrapTrait, Vec2, create_trap};
     use stark_brawl::models::tower::{Tower, TowerImpl, ZeroableTower};
     use stark_brawl::models::wave::{Wave, WaveImpl};
     use stark_brawl::models::enemy::{Enemy, EnemyImpl};
@@ -412,11 +412,11 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Tower not found',))]
-    fn test_store_read_nonexistent_tower() {
+    fn test_store_read_zero_tower() {
         let world = create_test_world();
         let store: Store = StoreTrait::new(world);
 
-        let _tower = store.read_tower(999_u64);
+        let _tower = store.read_tower(0_u64);
     }
 
     #[test]
@@ -547,16 +547,16 @@ mod tests {
         assert(store.read_trap(1_u32).is_active == true, 'Should be active again');
 
         let damage = store.trigger_trap(1_u32, enemy_pos);
-        assert(damage == 50_u16, 'Should deal damage after reactivation');
+        assert(damage == 50_u16, 'Should damage after reactivate');
     }
 
     #[test]
     #[should_panic(expected: ('Trap not found',))]
-    fn test_store_read_nonexistent_trap() {
+    fn test_store_read_zero_trap() {
         let world = create_test_world();
         let store: Store = StoreTrait::new(world);
 
-        let _trap = store.read_trap(999_u32);
+        let _trap = store.read_trap(0_u32);
     }
 
     #[test]
