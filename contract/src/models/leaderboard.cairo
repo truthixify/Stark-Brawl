@@ -1,4 +1,9 @@
-use starknet::ContractAddress;
+use starknet::{ContractAddress, contract_address_const};
+use core::num::traits::zero::Zero;
+
+pub fn ZERO_ADDRESS() -> ContractAddress {
+    contract_address_const::<0x0>()
+}
 
 #[derive(Copy, Drop, Serde, Debug, PartialEq)]
 #[dojo::model]
@@ -31,10 +36,30 @@ pub impl LeaderboardImpl of LeaderboardSystem {
     }
 }
 
+pub impl ZeroableLeaderboardEntry of Zero<LeaderboardEntry> {
+    #[inline(always)]
+    fn zero() -> LeaderboardEntry {
+        LeaderboardEntry {
+            player_id: ZERO_ADDRESS(),
+            kills: 0_u32,
+            deaths: 0_u32,
+        }
+    }
+
+    #[inline(always)]
+    fn is_zero(self: @LeaderboardEntry) -> bool {
+        *self.player_id == ZERO_ADDRESS()
+    }
+
+    #[inline(always)]
+    fn is_non_zero(self: @LeaderboardEntry) -> bool {
+        !Self::is_zero(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use starknet::contract_address_const;
 
     #[test]
     fn test_kdr_normal_case() {
