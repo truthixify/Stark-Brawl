@@ -3,8 +3,10 @@ use dojo::world::WorldStorage;
 use stark_brawl::models::inventory::{Inventory, InventoryImpl};
 use stark_brawl::models::item::Item;
 use stark_brawl::models::tower_stats::TowerStats;
+use stark_brawl::models::tower::{errors as TowerErrors, Tower, TowerImpl, ZeroableTower};
+use stark_brawl::models::trap::{Trap, TrapImpl, ZeroableTrapTrait, Vec2};
 use stark_brawl::models::player::{Player, PlayerImpl};
-use stark_brawl::models::wave::{errors, Wave, WaveImpl, ZeroableWave};
+use stark_brawl::models::wave::{errors as WaveErrors, Wave, WaveImpl, ZeroableWave};
 use stark_brawl::models::enemy::{Enemy, EnemyImpl, ZeroableEnemy};
 use stark_brawl::models::statistics::{Statistics, StatisticsImpl, ZeroableStatistics};
 use stark_brawl::models::leaderboard::{LeaderboardEntry, LeaderboardImpl, ZeroableLeaderboardEntry};
@@ -108,8 +110,8 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn start_wave(ref self: Store, wave_id: u64, current_tick: u64) {
         let mut wave = self.read_wave(wave_id);
-        assert(wave.is_active == false, errors::AlreadyActive);
-        assert(wave.is_completed == false, errors::AlreadyCompleted);
+        assert(wave.is_active == false, WaveErrors::AlreadyActive);
+        assert(wave.is_completed == false, WaveErrors::AlreadyCompleted);
         let started_wave = WaveImpl::start(@wave, current_tick);
         self.write_wave(@started_wave)
     }
@@ -117,7 +119,7 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn register_enemy_spawn(ref self: Store, wave_id: u64, current_tick: u64) {
         let wave = self.read_wave(wave_id);
-        assert(WaveImpl::should_spawn(@wave, current_tick) == true, errors::InvalidSpawnTick);
+        assert(WaveImpl::should_spawn(@wave, current_tick) == true, WaveErrors::InvalidSpawnTick);
         let spawned_wave = WaveImpl::register_spawn(@wave, current_tick);
         self.write_wave(@spawned_wave)
 
@@ -126,7 +128,7 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn complete_wave(ref self: Store, wave_id: u64) {
         let mut wave = self.read_wave(wave_id);
-        assert(wave.is_active == true, errors::NotActive);
+        assert(wave.is_active == true, WaveErrors::NotActive);
         let completed_wave = WaveImpl::complete(@wave);
         self.write_wave(@completed_wave)
     }
@@ -168,21 +170,85 @@ pub impl StoreImpl of StoreTrait {
         self.write_enemy(@moved_enemy);
     }
 
-    // Simple helpers to add coins and gems to player
+    // -------------------------------
+    // Tower operations
+    // -------------------------------
     #[inline]
-    fn add_coins(ref self: Store, mut player: Player, amount: u64) -> Player {
-        let new_coins = player.coins + amount;
-        player.coins = new_coins;
-        self.write_player(@player);
-        player
+    fn read_tower(self: @Store, tower_id: u64) -> Tower {
+        let tower: Tower = self.world.read_model(tower_id);
+        assert(tower.is_non_zero(), 'Tower not found');
+        tower
     }
 
     #[inline]
-    fn add_gems(ref self: Store, mut player: Player, amount: u64) -> Player {
-        let new_gems = player.gems + amount;
-        player.gems = new_gems;
-        self.write_player(@player);
-        player
+    fn write_tower(ref self: Store, tower: @Tower) {
+        self.world.write_model(tower);
+    }
+
+    #[inline]
+    fn place_tower(ref self: Store, tower: Tower) {
+        assert(tower.is_zero() == false, 'Tower not initialized');
+        self.write_tower(@tower)
+    }
+
+    #[inline]
+    fn upgrade_tower(ref self: Store, tower_id: u64) {
+        let tower = self.read_tower(tower_id);
+        assert(tower.level < 5, TowerErrors::MaxLevelReached);
+        let upgraded_tower = TowerImpl::upgrade(@tower);
+        self.write_tower(@upgraded_tower)
+    }
+
+    #[inline]
+    fn can_tower_attack(self: @Store, tower_id: u64, current_tick: u64, cooldown: u64) -> bool {
+        let tower = self.read_tower(tower_id);
+        assert(tower.is_zero() == false, 'Tower not initialized');
+        TowerImpl::can_attack(@tower, current_tick, cooldown)
+    }
+
+    // -------------------------------
+    // Trap operations
+    // -------------------------------
+    #[inline]
+    fn read_trap(self: @Store, trap_id: u32) -> Trap {
+        let trap: Trap = self.world.read_model(trap_id);
+        assert(trap.is_non_zero(), 'Trap not found');
+        trap
+    }
+
+    #[inline]
+    fn write_trap(ref self: Store, trap: @Trap) {
+        self.world.write_model(trap);
+    }
+
+    #[inline]
+    fn place_trap(ref self: Store, trap: Trap) {
+        assert(trap.is_zero() == false, 'Trap not initialized');
+        self.write_trap(@trap)
+    }
+
+    #[inline]
+    fn trigger_trap(ref self: Store, trap_id: u32, enemy_pos: Vec2) -> u16 {
+        let mut trap = self.read_trap(trap_id);
+        assert(trap.is_active == true, 'Trap not active');
+        assert(TrapImpl::check_trigger(@trap, enemy_pos) == true, 'Enemy not in range');
+        let damage = TrapImpl::trigger(ref trap);
+        self.write_trap(@trap);
+        damage
+    }
+
+    #[inline]
+    fn deactivate_trap(ref self: Store, trap_id: u32) {
+        let mut trap = self.read_trap(trap_id);
+        TrapImpl::deactivate(ref trap);
+        self.write_trap(@trap)
+    }
+
+    #[inline]
+    fn reactivate_trap(ref self: Store, trap_id: u32) {
+        let mut trap = self.read_trap(trap_id);
+        TrapImpl::activate(ref trap);
+        self.write_trap(@trap)
     }
 
     // -------------------------------
@@ -269,6 +335,23 @@ pub impl StoreImpl of StoreTrait {
 
         // Persist updated stats
         self.write_statistics(@updated_stats);
+    }
+
+    // Simple helpers to add coins and gems to player
+    #[inline]
+    fn add_coins(ref self: Store, mut player: Player, amount: u64) -> Player {
+        let new_coins = player.coins + amount;
+        player.coins = new_coins;
+        self.write_player(@player);
+        player
+    }
+
+    #[inline]
+    fn add_gems(ref self: Store, mut player: Player, amount: u64) -> Player {
+        let new_gems = player.gems + amount;
+        player.gems = new_gems;
+        self.write_player(@player);
+        player
     }
 
 }
