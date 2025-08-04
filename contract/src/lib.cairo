@@ -25,7 +25,6 @@ pub mod models {
     pub mod spawn_point;
     pub mod wave;
     pub mod wave_progress;
-
 }
 
 mod store;

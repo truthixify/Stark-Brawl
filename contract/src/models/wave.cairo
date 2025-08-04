@@ -35,7 +35,7 @@ pub trait WaveSystem {
 pub impl WaveImpl of WaveSystem {
     fn new(id: u64, level: u32, enemy_count: u32, tick_interval: u32) -> Wave {
         assert(enemy_count > 0, errors::InvalidEnemyCount);
-        
+
         Wave {
             id,
             level,
@@ -90,7 +90,7 @@ pub impl WaveImpl of WaveSystem {
         }
 
         // Check if enough ticks have passed since the last spawn
-      current_tick >= *self.last_spawn_tick + (*self.tick_interval).into()
+        current_tick >= *self.last_spawn_tick + (*self.tick_interval).into()
     }
 
     fn register_spawn(self: @Wave, current_tick: u64) -> Wave {
@@ -166,7 +166,7 @@ mod tests {
     fn test_start_wave() {
         let wave = sample_wave();
         let active_wave = WaveImpl::start(@wave, 500_u64);
-        
+
         assert(active_wave.is_active == true, 'Should be active');
         assert(active_wave.last_spawn_tick == 500_u64, 'Incorrect last spawn tick');
     }
@@ -183,10 +183,10 @@ mod tests {
     fn test_should_spawn() {
         let wave = sample_wave();
         let active_wave = WaveImpl::start(@wave, 500_u64);
-        
+
         // Not enough time has passed
         assert(WaveImpl::should_spawn(@active_wave, 550_u64) == false, 'Should not spawn yet');
-        
+
         // Enough time has passed
         assert(WaveImpl::should_spawn(@active_wave, 600_u64) == true, 'Should spawn now');
     }
@@ -196,7 +196,7 @@ mod tests {
         let wave = sample_wave();
         let active_wave = WaveImpl::start(@wave, 500_u64);
         let updated_wave = WaveImpl::register_spawn(@active_wave, 600_u64);
-        
+
         assert(updated_wave.enemies_spawned == 1_u32, 'Should have 1 spawned');
         assert(updated_wave.last_spawn_tick == 600_u64, 'Should update last spawn tick');
     }
@@ -206,7 +206,7 @@ mod tests {
         let wave = sample_wave();
         let active_wave = WaveImpl::start(@wave, 500_u64);
         let completed_wave = WaveImpl::complete(@active_wave);
-        
+
         assert(completed_wave.is_active == false, 'Should not be active');
         assert(completed_wave.is_completed == true, 'Should be completed');
     }
@@ -223,7 +223,7 @@ mod tests {
         let wave = WaveImpl::new(1_u64, 1_u32, 1_u32, 100_u32);
         let active_wave = WaveImpl::start(@wave, 500_u64);
         let final_wave = WaveImpl::register_spawn(@active_wave, 600_u64);
-        
+
         assert(final_wave.is_active == false, 'Should not be active');
         assert(final_wave.is_completed == true, 'Should be completed');
     }
