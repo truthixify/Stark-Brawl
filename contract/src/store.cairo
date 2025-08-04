@@ -9,7 +9,9 @@ use stark_brawl::models::player::{Player, PlayerImpl};
 use stark_brawl::models::wave::{errors as WaveErrors, Wave, WaveImpl, ZeroableWave};
 use stark_brawl::models::enemy::{Enemy, EnemyImpl, ZeroableEnemy};
 use stark_brawl::models::statistics::{Statistics, StatisticsImpl, ZeroableStatistics};
-use stark_brawl::models::leaderboard::{LeaderboardEntry, LeaderboardImpl, ZeroableLeaderboardEntry};
+use stark_brawl::models::leaderboard::{
+    LeaderboardEntry, ILeaderboardEntry, ZeroableLeaderboardEntry,
+};
 use starknet::ContractAddress;
 
 #[derive(Drop)]
@@ -122,7 +124,6 @@ pub impl StoreImpl of StoreTrait {
         assert(WaveImpl::should_spawn(@wave, current_tick) == true, WaveErrors::InvalidSpawnTick);
         let spawned_wave = WaveImpl::register_spawn(@wave, current_tick);
         self.write_wave(@spawned_wave)
-
     }
 
     #[inline]
@@ -268,28 +269,20 @@ pub impl StoreImpl of StoreTrait {
 
     #[inline]
     fn update_leaderboard(ref self: Store, player_id: ContractAddress, kills: u32, deaths: u32) {
-        let existing_entry = self.read_leaderboard_entry(player_id);
-        
-        let mut updated_entry = if existing_entry.is_zero() {
-            // Create new entry if none exists
-            LeaderboardEntry {
-                player_id,
-                kills,
-                deaths,
-            }
-        } else {
-            // Increment existing kills and deaths
-            LeaderboardEntry {
-                player_id: existing_entry.player_id,
-                kills: existing_entry.kills + kills,
-                deaths: existing_entry.deaths + deaths,
-            }
-        };
+        let mut entry = self.read_leaderboard_entry(player_id);
 
-        // Assert updated entry is valid - panic if kills or deaths exceed 1000
-        assert(updated_entry.is_valid(), 'Invalid leaderboard entry');
-        
-        self.write_leaderboard_entry(@updated_entry);
+        if entry.is_zero() {
+            entry = LeaderboardEntry { player_id, kills: 0, deaths: 0 };
+        }
+
+        if kills > 0 {
+            entry.increment_kills(kills);
+        }
+        if deaths > 0 {
+            entry.increment_deaths(deaths);
+        }
+
+        self.write_leaderboard_entry(@entry);
     }
 
     // -------------------------------
@@ -310,22 +303,17 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn increment_match_result(ref self: Store, player_id: felt252, won: bool) {
         let existing_stats = self.read_statistics(player_id);
-        
+
         let mut updated_stats = if existing_stats.is_zero() {
             // Create Statistics if none exists
-            Statistics {
-                player_id,
-                matches_played: 0,
-                wins: 0,
-                defeats: 0,
-            }
+            Statistics { player_id, matches_played: 0, wins: 0, defeats: 0 }
         } else {
             existing_stats
         };
 
         // Increment matches_played always
         StatisticsImpl::increment_matches_played(ref updated_stats);
-        
+
         // Increment wins if won == true, otherwise increment defeats
         if won {
             StatisticsImpl::increment_wins(ref updated_stats);
@@ -353,5 +341,4 @@ pub impl StoreImpl of StoreTrait {
         self.write_player(@player);
         player
     }
-
 }

@@ -38,14 +38,7 @@ trait RewardPoolTrait {
 
 impl RewardImpl of RewardTrait {
     fn new(reward_id: u32, coins: u32, gems: u32, items: u32, owner: ContractAddress) -> Reward {
-        Reward {
-            reward_id,
-            coins,
-            gems,
-            items,
-            claimed: false,
-            owner,
-        }
+        Reward { reward_id, coins, gems, items, claimed: false, owner }
     }
 
     fn is_claimable(self: @Reward) -> bool {
@@ -68,10 +61,7 @@ impl RewardImpl of RewardTrait {
 impl RewardPoolImpl of RewardPoolTrait {
     fn new(pool_id: u32) -> RewardPool {
         RewardPool {
-            pool_id,
-            next_reward_id: 0,
-            total_rewards_created: 0,
-            total_rewards_claimed: 0,
+            pool_id, next_reward_id: 0, total_rewards_created: 0, total_rewards_claimed: 0,
         }
     }
 
@@ -133,7 +123,7 @@ mod tests {
     fn test_reward_get_value() {
         let owner = contract_address_const::<0x123>();
         let reward = RewardTrait::new(1, 100, 5, 10, owner);
-        
+
         // Value = coins + (gems * 10) + items = 100 + (5 * 10) + 10 = 160
         let value = reward.get_value();
         assert(value == 160, 'Wrong total value');
