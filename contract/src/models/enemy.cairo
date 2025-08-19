@@ -13,6 +13,7 @@ pub struct Enemy {
     pub is_alive: bool,
     pub coin_reward: u32,
     pub xp_reward: u32,
+    pub reward_claimed: bool,
 }
 
 mod errors {
@@ -51,7 +52,18 @@ pub impl EnemyImpl of EnemySystem {
         assert(coin_reward > 0_u32, 'coin_reward must be > 0');
         assert(xp_reward > 0_u32, 'xp_reward must be > 0');
 
-        Enemy { id, enemy_type, health, speed, x, y, is_alive: true, coin_reward, xp_reward }
+        Enemy {
+            id,
+            enemy_type,
+            health,
+            speed,
+            x,
+            y,
+            is_alive: true,
+            coin_reward,
+            xp_reward,
+            reward_claimed: false // Initialize as false
+        }
     }
 
     fn take_damage(self: @Enemy, amount: u32) -> Enemy {
@@ -77,6 +89,7 @@ pub impl EnemyImpl of EnemySystem {
             is_alive: new_is_alive,
             coin_reward: *self.coin_reward,
             xp_reward: *self.xp_reward,
+            reward_claimed: *self.reward_claimed // Preserve existing value
         }
     }
 
@@ -95,6 +108,7 @@ pub impl EnemyImpl of EnemySystem {
             is_alive: *self.is_alive,
             coin_reward: *self.coin_reward,
             xp_reward: *self.xp_reward,
+            reward_claimed: *self.reward_claimed,
         }
     }
 }
@@ -111,6 +125,7 @@ pub impl ZeroableEnemy of Zero<Enemy> {
             is_alive: false,
             coin_reward: 0,
             xp_reward: 0,
+            reward_claimed: false,
         }
     }
 
