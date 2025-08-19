@@ -84,7 +84,7 @@ pub impl StoreImpl of StoreTrait {
     // Player operations
     // -------------------------------
     #[inline]
-    fn read_player(self: Store, player_id: felt252) -> Player {
+    fn read_player(self: @Store, player_id: felt252) -> Player {
         self.world.read_model(player_id)
     }
 
@@ -340,5 +340,26 @@ pub impl StoreImpl of StoreTrait {
         player.gems = new_gems;
         self.write_player(@player);
         player
+    }
+
+    #[inline]
+    fn distribute_rewards(ref self: Store, enemy_id: u64, player_address: ContractAddress) {
+        let mut enemy = self.read_enemy(enemy_id);
+        let mut player = self.read_player(player_address.into());
+
+        // Verify enemy is dead and reward is not claimed
+        assert(!enemy.is_alive, 'Enemy must be defeated');
+        assert(!enemy.reward_claimed, 'Reward already claimed');
+
+        // Add rewards to player
+        player.add_coins(enemy.coin_reward.into());
+        player.add_xp(enemy.xp_reward);
+
+        // Mark the reward as claimed
+        enemy.reward_claimed = true;
+
+        // Write updated data to storage
+        self.write_player(@player);
+        self.write_enemy(@enemy);
     }
 }

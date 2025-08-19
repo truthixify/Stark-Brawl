@@ -2,7 +2,7 @@ use starknet::{ContractAddress, contract_address_const};
 use core::num::traits::zero::Zero;
 use core::option::Option;
 
-#[derive(Copy, Drop, Serde, IntrospectPacked, Debug)]
+#[derive(Copy, Drop, Serde, Debug)]
 #[dojo::model]
 pub struct Player {
     #[key]

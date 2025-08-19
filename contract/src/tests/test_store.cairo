@@ -17,6 +17,7 @@ mod tests {
     };
     use stark_brawl::store::{Store, StoreTrait};
     use starknet::{ContractAddress, contract_address_const};
+    use stark_brawl::models::player::{Player, PlayerImpl, spawn_player};
 
     // System imports
     use stark_brawl::systems::game::{brawl_game};
@@ -78,6 +79,10 @@ mod tests {
 
     fn create_sample_wave() -> Wave {
         WaveImpl::new(1_u64, 1_u32, 3_u32, 100_u32)
+    }
+
+    fn create_sample_player() -> Player {
+        spawn_player(contract_address_const::<0x12345678>())
     }
 
     fn create_sample_enemy() -> Enemy {
@@ -889,4 +894,148 @@ mod tests {
         assert(statsC.matches_played == 1_u8, 'Player C: 1 match');
         assert(statsC.wins == 1_u8, 'Player C: 1 win');
     }
+
+    // -------------------------------
+    // Reward Distribution Tests
+    // -------------------------------
+
+    #[test]
+    fn test_distribute_rewards_success() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        // Setup: Create a player and a defeated enemy
+        let mut player = create_sample_player();
+        let initial_coins = player.coins;
+        let initial_xp = player.xp;
+        // store.write_player(@player);
+
+        let mut enemy = create_sample_enemy();
+        enemy.is_alive = false; // Manually set as defeated
+        store.write_enemy(@enemy);
+
+        // Action: Distribute the rewards
+        store.distribute_rewards(enemy.id, player.address);
+
+        // Assertions
+        let updated_player = store.read_player(player.address.into());
+        assert(
+            updated_player.coins == initial_coins + enemy.coin_reward.into(),
+            'Player coins incorrect',
+        );
+        assert(updated_player.xp == initial_xp + enemy.xp_reward, 'Player XP incorrect');
+
+        let updated_enemy = store.read_enemy(enemy.id);
+        assert(updated_enemy.reward_claimed == true, 'Reward should be claimed');
+    }
+
+    #[test]
+    #[should_panic(expected: ('Enemy must be defeated',))]
+    fn test_distribute_rewards_panics_if_enemy_alive() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        // Setup: Player and an ALIVE enemy
+        let player = create_sample_player();
+        store.write_player(@player);
+
+        let enemy = create_sample_enemy(); // is_alive is true by default
+        store.write_enemy(@enemy);
+
+        // Action: Attempt to distribute rewards for a live enemy (should panic)
+        store.distribute_rewards(enemy.id, player.address);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Reward already claimed',))]
+    fn test_distribute_rewards_panics_if_already_claimed() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        // Setup
+        let player = create_sample_player();
+        store.write_player(@player);
+        let mut enemy = create_sample_enemy();
+        enemy.is_alive = false;
+        store.write_enemy(@enemy);
+
+        // Action: Distribute rewards once (this should succeed)
+        store.distribute_rewards(enemy.id, player.address);
+
+        // Action 2: Attempt to distribute again (this should panic)
+        store.distribute_rewards(enemy.id, player.address);
+    }
+
+    #[test]
+    fn test_distribute_rewards_zero_initial_player_stats() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        // Setup: Player with zero coins and XP
+        let mut player = create_sample_player();
+        player.coins = 0;
+        player.xp = 0;
+        store.write_player(@player);
+
+        let mut enemy = create_sample_enemy();
+        enemy.is_alive = false;
+        store.write_enemy(@enemy);
+
+        // Action
+        store.distribute_rewards(enemy.id, player.address);
+
+        // Assertions
+        let updated_player = store.read_player(player.address.into());
+        assert(updated_player.coins == enemy.coin_reward.into(), 'Coins should match reward');
+        assert(updated_player.xp == enemy.xp_reward, 'XP should match reward');
+    }
+
+    #[test]
+    fn test_distribute_rewards_multiple_players_and_enemies() {
+        let world = create_test_world();
+        let mut store: Store = StoreTrait::new(world);
+
+        // Setup: Two players, two enemies
+        let mut player_a = spawn_player(contract_address_const::<0xA>());
+        let mut player_b = spawn_player(contract_address_const::<0xB>());
+        store.write_player(@player_a);
+        store.write_player(@player_b);
+
+        let mut enemy_1 = EnemyImpl::new(1, 'goblin', 50, 5, 0, 0, 10, 20);
+        let mut enemy_2 = EnemyImpl::new(2, 'orc', 100, 3, 0, 0, 25, 50);
+        enemy_1.is_alive = false;
+        enemy_2.is_alive = false;
+        store.write_enemy(@enemy_1);
+        store.write_enemy(@enemy_2);
+
+        // Action 1: Player A claims reward for Enemy 1
+        store.distribute_rewards(enemy_1.id, player_a.address);
+
+        // Assertions for Action 1
+        let updated_player_a = store.read_player(player_a.address.into());
+        let updated_player_b = store.read_player(player_b.address.into());
+        assert(updated_player_a.coins == 10, 'Player A coins incorrect');
+        assert(updated_player_a.xp == 20, 'Player A XP incorrect');
+        assert!(updated_player_b.coins == 0, "Player B coins should not change");
+        assert(updated_player_b.xp == 0, 'Player B XP should not change');
+
+        let updated_enemy_1 = store.read_enemy(enemy_1.id);
+        let updated_enemy_2 = store.read_enemy(enemy_2.id);
+        assert!(updated_enemy_1.reward_claimed == true, "Enemy 1 reward should be claimed");
+        assert!(updated_enemy_2.reward_claimed == false, "Enemy 2 reward should not be claimed");
+
+        // Action 2: Player B claims reward for Enemy 2
+        store.distribute_rewards(enemy_2.id, player_b.address);
+
+        // Assertions for Action 2
+        let final_player_a = store.read_player(player_a.address.into());
+        let final_player_b = store.read_player(player_b.address.into());
+        assert!(final_player_a.coins == 10, "Player A coins should not change again");
+        assert(final_player_b.coins == 25, 'Player B coins incorrect');
+        assert(final_player_b.xp == 50, 'Player B XP incorrect');
+
+        let final_enemy_2 = store.read_enemy(enemy_2.id);
+        assert!(final_enemy_2.reward_claimed == true, "Enemy 2 reward should now be claimed");
+    }
 }
+

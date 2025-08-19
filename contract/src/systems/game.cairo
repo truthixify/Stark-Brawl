@@ -1,11 +1,11 @@
 use starknet::ContractAddress;
 
-
 #[starknet::interface]
 pub trait IBrawlGame<T> {
     fn join_game(ref self: T);
     fn use_ability(ref self: T, ability_id: u32, target_id: ContractAddress);
     fn take_damage(ref self: T, amount: u32);
+    fn attack_enemy(ref self: T, enemy_id: u64, damage: u32);
     fn get_player_status(ref self: T) -> PlayerStatus;
     fn use_item(ref self: T, item_id: u32);
 }
@@ -36,6 +36,7 @@ pub mod brawl_game {
     use stark_brawl::models::item::{Item, ItemType};
     use stark_brawl::models::inventory::{Inventory};
     use stark_brawl::models::enemy::{Enemy, EnemySystem};
+    use stark_brawl::store::{Store, StoreImpl};
 
     #[storage]
     struct Storage {
@@ -76,6 +77,32 @@ pub mod brawl_game {
             PlayerTrait::take_damage(ref player, amount.try_into().unwrap());
 
             world.write_model(@player);
+        }
+
+        fn attack_enemy(ref self: ContractState, enemy_id: u64, damage: u32) {
+            let caller = get_caller_address();
+            let world = self.world_default();
+
+            // Instantiate the Store to interact with models
+            let mut store: Store = StoreImpl::new(world);
+
+            // Read the current state of the enemy
+            let enemy: Enemy = store.read_enemy(enemy_id);
+
+            // CHECK to ensure we're not attacking a dead enemy
+            assert(enemy.is_alive, 'Enemy is already dead');
+
+            // Apply damage to the enemy
+            let damaged_enemy = EnemySystem::take_damage(@enemy, damage);
+
+            // Write the enemy's new state back to storage
+            store.write_enemy(@damaged_enemy);
+
+            // CHECK if the enemy was defeated in this attack
+            if !damaged_enemy.is_alive {
+                // 6. If so, call the store to distribute rewards to the attacker
+                store.distribute_rewards(enemy_id, caller);
+            }
         }
 
         fn get_player_status(ref self: ContractState) -> PlayerStatus {
