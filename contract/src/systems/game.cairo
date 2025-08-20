@@ -26,9 +26,7 @@ pub mod brawl_game {
     use starknet::storage::{StoragePointerWriteAccess};
 
 
-    use dojo::world::IWorldDispatcherTrait;
     use dojo::model::{ModelStorage};
-    use dojo::event::EventStorage;
 
 
     use stark_brawl::models::player::{Player, PlayerTrait, spawn_player};
