@@ -1,5 +1,6 @@
 pub mod systems {
     pub mod game;
+    pub mod player;
 }
 
 pub mod models {

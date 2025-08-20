@@ -6,6 +6,7 @@ use stark_brawl::models::tower_stats::TowerStats;
 use stark_brawl::models::tower::{errors as TowerErrors, Tower, TowerImpl, ZeroableTower};
 use stark_brawl::models::trap::{Trap, TrapImpl, ZeroableTrapTrait, Vec2};
 use stark_brawl::models::player::{Player, PlayerImpl};
+use stark_brawl::systems::player::{IPlayerSystemDispatcher, IPlayerSystemDispatcherTrait};
 use stark_brawl::models::wave::{errors as WaveErrors, Wave, WaveImpl, ZeroableWave};
 use stark_brawl::models::enemy::{Enemy, EnemyImpl, ZeroableEnemy};
 use stark_brawl::models::statistics::{Statistics, StatisticsImpl, ZeroableStatistics};
@@ -325,41 +326,32 @@ pub impl StoreImpl of StoreTrait {
         self.write_statistics(@updated_stats);
     }
 
-    // Simple helpers to add coins and gems to player
     #[inline]
-    fn add_coins(ref self: Store, mut player: Player, amount: u64) -> Player {
-        let new_coins = player.coins + amount;
-        player.coins = new_coins;
-        self.write_player(@player);
-        player
-    }
-
-    #[inline]
-    fn add_gems(ref self: Store, mut player: Player, amount: u64) -> Player {
-        let new_gems = player.gems + amount;
-        player.gems = new_gems;
-        self.write_player(@player);
-        player
-    }
-
-    #[inline]
-    fn distribute_rewards(ref self: Store, enemy_id: u64, player_address: ContractAddress) {
+    fn distribute_rewards(
+        ref self: Store,
+        player_system_contract_address: ContractAddress,
+        enemy_id: u64,
+        player_address: ContractAddress,
+    ) {
+        let world = self.world;
         let mut enemy = self.read_enemy(enemy_id);
-        let mut player = self.read_player(player_address.into());
 
-        // Verify enemy is dead and reward is not claimed
         assert(!enemy.is_alive, 'Enemy must be defeated');
         assert(!enemy.reward_claimed, 'Reward already claimed');
 
-        // Add rewards to player
-        player.add_coins(enemy.coin_reward.into());
+        // Update persistent XP in the Player model
+        let mut player = self.read_player(player_address.into());
         player.add_xp(enemy.xp_reward);
-
-        // Mark the reward as claimed
-        enemy.reward_claimed = true;
-
-        // Write updated data to storage
         self.write_player(@player);
+
+        // Call the PlayerSystem to add coins to its internal storage
+        let player_system = IPlayerSystemDispatcher {
+            contract_address: player_system_contract_address,
+        };
+        player_system.add_coins(player_address, enemy.coin_reward.into());
+
+        // Mark the reward as claimed and save enemy state
+        enemy.reward_claimed = true;
         self.write_enemy(@enemy);
     }
 }

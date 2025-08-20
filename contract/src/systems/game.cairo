@@ -23,7 +23,7 @@ pub enum PlayerStatus {
 pub mod brawl_game {
     use super::{IBrawlGame, PlayerStatus};
     use starknet::{ContractAddress, get_caller_address};
-    use starknet::storage::{StoragePointerWriteAccess};
+    use starknet::storage::{StoragePointerWriteAccess, StoragePointerReadAccess};
 
 
     use dojo::model::{ModelStorage};
@@ -35,14 +35,17 @@ pub mod brawl_game {
     use stark_brawl::models::inventory::{Inventory};
     use stark_brawl::models::enemy::{Enemy, EnemySystem};
     use stark_brawl::store::{Store, StoreImpl};
+    use stark_brawl::systems::player::{IPlayerSystemDispatcher, IPlayerSystemDispatcherTrait};
 
     #[storage]
     struct Storage {
         game_counter: u32,
+        player_system_contract_address: ContractAddress,
     }
 
-    fn dojo_init(ref self: ContractState) {
+    fn dojo_init(ref self: ContractState, player_system_contract_address: ContractAddress) {
         self.game_counter.write(0);
+        self.player_system_contract_address.write(player_system_contract_address);
     }
 
     #[abi(embed_v0)]
@@ -54,6 +57,9 @@ pub mod brawl_game {
             let player = spawn_player(caller);
 
             world.write_model(@player);
+
+            let player_system_dispatcher = self.player_system_dispatcher();
+            player_system_dispatcher.initialize(caller);
         }
 
         fn use_ability(ref self: ContractState, ability_id: u32, target_id: ContractAddress) {
@@ -69,12 +75,9 @@ pub mod brawl_game {
         fn take_damage(ref self: ContractState, amount: u32) {
             let mut world = self.world_default();
             let caller = get_caller_address();
+            let player_system_dispatcher = self.player_system_dispatcher();
 
-            let mut player: Player = world.read_model(caller);
-
-            PlayerTrait::take_damage(ref player, amount.try_into().unwrap());
-
-            world.write_model(@player);
+            player_system_dispatcher.take_damage(caller, amount.try_into().unwrap());
         }
 
         fn attack_enemy(ref self: ContractState, enemy_id: u64, damage: u32) {
@@ -99,17 +102,19 @@ pub mod brawl_game {
             // CHECK if the enemy was defeated in this attack
             if !damaged_enemy.is_alive {
                 // 6. If so, call the store to distribute rewards to the attacker
-                store.distribute_rewards(enemy_id, caller);
+                store
+                    .distribute_rewards(
+                        self.player_system_contract_address.read(), enemy_id, caller,
+                    );
             }
         }
 
         fn get_player_status(ref self: ContractState) -> PlayerStatus {
             let world = self.world_default();
             let caller = get_caller_address();
+            let player_system_dispatcher = self.player_system_dispatcher();
 
-            let player: Player = world.read_model(caller);
-
-            if PlayerTrait::is_alive(@player) {
+            if player_system_dispatcher.is_alive(caller) {
                 PlayerStatus::Alive
             } else {
                 PlayerStatus::Dead
@@ -122,18 +127,14 @@ pub mod brawl_game {
 
             let mut inventory: Inventory = world.read_model(caller);
             let item: Item = world.read_model(item_id);
-            let mut player: Player = world.read_model(caller);
+            let player_system_dispatcher = self.player_system_dispatcher();
 
             match item.item_type {
                 ItemType::Trap => {},
                 ItemType::Upgrade => {
-                    let updated_player = Player { max_hp: player.max_hp + item.value, ..player };
-                    world.write_model(@updated_player);
+                    player_system_dispatcher.upgrade_max_hp(caller, item.value);
                 },
-                ItemType::Consumable => {
-                    PlayerTrait::heal(ref player, item.value);
-                    world.write_model(@player);
-                },
+                ItemType::Consumable => { player_system_dispatcher.heal(caller, item.value); },
             }
 
             world.write_model(@inventory);
@@ -232,6 +233,10 @@ pub mod brawl_game {
     impl InternalImpl of InternalTrait {
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
             self.world(@"stark_brawl")
+        }
+
+        fn player_system_dispatcher(self: @ContractState) -> IPlayerSystemDispatcher {
+            IPlayerSystemDispatcher { contract_address: self.player_system_contract_address.read() }
         }
     }
 }
