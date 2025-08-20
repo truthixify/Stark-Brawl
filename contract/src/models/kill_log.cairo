@@ -1,0 +1,153 @@
+use starknet::{ContractAddress, contract_address_const};
+
+////////////////  MODEL  ///////////////
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
+pub struct KillLog {
+    #[key]
+    pub log_id: u32,
+    pub player_id: ContractAddress,
+    pub enemy_type: felt252,
+    pub reward_coins: u32,
+    pub timestamp: u64,
+}
+
+////////////////  ZEROABLE  ///////////////
+
+trait ZeroTrait {
+    fn zero() -> KillLog;
+    fn is_zero(self: @KillLog) -> bool;
+    fn is_non_zero(self: @KillLog) -> bool;
+}
+
+pub impl ZeroableKillLog of ZeroTrait {
+    #[inline(always)]
+    fn zero() -> KillLog {
+        KillLog {
+            log_id: 0,
+            player_id: contract_address_const::<0>(),
+            enemy_type: 0,
+            reward_coins: 0,
+            timestamp: 0,
+        }
+    }
+
+    #[inline(always)]
+    fn is_zero(self: @KillLog) -> bool {
+        *self.log_id == 0
+            && *self.player_id == contract_address_const::<0>()
+            && *self.enemy_type == 0
+            && *self.reward_coins == 0
+            && *self.timestamp == 0
+    }
+
+    #[inline(always)]
+    fn is_non_zero(self: @KillLog) -> bool {
+        !Self::is_zero(self)
+    }
+}
+
+////////////////  KILL_LOG  ///////////////
+
+trait KillLogTrait {
+    fn new(
+        log_id: u32,
+        player_id: ContractAddress,
+        enemy_type: felt252,
+        reward_coins: u32,
+        timestamp: u64,
+    ) -> KillLog;
+
+    fn enemy_type(self: @KillLog) -> felt252;
+}
+
+impl KillLogImpl of KillLogTrait {
+    fn new(
+        log_id: u32,
+        player_id: ContractAddress,
+        enemy_type: felt252,
+        reward_coins: u32,
+        timestamp: u64,
+    ) -> KillLog {
+        KillLog { log_id, player_id, enemy_type, reward_coins, timestamp }
+    }
+
+    fn enemy_type(self: @KillLog) -> felt252 {
+        *self.enemy_type
+    }
+}
+
+////////////////  TEST  ///////////////
+
+#[cfg(test)]
+mod tests {
+    use super::{ZeroableKillLog, KillLogTrait};
+    use starknet::contract_address_const;
+
+    #[test]
+    fn test_killlog_creation() {
+        let player = contract_address_const::<0x456>();
+        let ts = 1692531591_u64;
+        let log = KillLogTrait::new(1, player, 2, 20, ts);
+
+        assert!(log.log_id == 1, "Wrong log_id");
+        assert!(log.player_id == player, "Wrong player_id");
+        assert!(log.enemy_type == 2, "Wrong enemy_type");
+        assert!(log.reward_coins == 20, "Wrong reward_coins");
+        assert!(log.timestamp == ts, "Wrong timestamp");
+    }
+
+    #[test]
+    fn test_zeroable_killlog() {
+        let zero_log = ZeroableKillLog::zero();
+
+        assert!(zero_log.log_id == 0, "Zero log_id must be 0");
+        assert!(
+            zero_log.player_id == contract_address_const::<0>(),
+            "Zero player_id must be zero address",
+        );
+        assert!(zero_log.enemy_type == 0, "Zero enemy_type must be 0");
+        assert!(zero_log.reward_coins == 0, "Zero reward_coins must be 0");
+        assert!(zero_log.timestamp == 0, "Zero timestamp must be 0");
+
+        assert!(zero_log.is_zero(), "is_zero() should return true for zero log");
+        assert!(!zero_log.is_non_zero(), "is_non_zero() should return false for zero log");
+
+        // Non-zero log test
+        let player = contract_address_const::<0x789>();
+        let log = KillLogTrait::new(17, player, 3, 50, 1720000000_u64);
+        assert!(!log.is_zero(), "is_zero() should return false for nonzero log");
+        assert!(log.is_non_zero(), "is_non_zero() should return true for nonzero log");
+    }
+
+    #[test]
+    fn test_multiple_killlogs_data_integrity() {
+        let player1 = contract_address_const::<0x111>();
+        let player2 = contract_address_const::<0x222>();
+        let ts1 = 1650000000_u64;
+        let ts2 = 1650000500_u64;
+        let log1 = KillLogTrait::new(101, player1, 1, 30, ts1);
+        let log2 = KillLogTrait::new(102, player2, 2, 35, ts2);
+
+        assert!(log1.log_id != log2.log_id, "Different logs must have different IDs");
+        assert!(log1.timestamp != log2.timestamp, "Different logs must have distinct timestamps");
+        assert!(log1.player_id != log2.player_id, "Log player must match creation");
+    }
+
+    #[test]
+    fn test_killlog_enemy_type() {
+        let player = contract_address_const::<0xabc>();
+        let enemy_type_value: felt252 = 'UNK';
+        let log_id = 100;
+        let reward_coins = 20;
+        let timestamp = 1692531591_u64;
+
+        let log = KillLogTrait::new(log_id, player, enemy_type_value, reward_coins, timestamp);
+
+        assert!(
+            log.enemy_type() == enemy_type_value,
+            "enemy_type() should return the correct enemy_type",
+        );
+    }
+}
