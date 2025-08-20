@@ -103,6 +103,7 @@ pub impl ZeroableReward of ZeroTrait {
             && *self.gems == 0
             && *self.items == 0
             && !*self.claimed
+            && *self.owner == contract_address_const::<0>()
     }
 
     #[inline(always)]
@@ -239,6 +240,14 @@ mod tests {
         assert!(!non_zero_reward.is_zero(), "is_zero should return false for non-zero reward");
         assert!(
             non_zero_reward.is_non_zero(), "is_non_zero should return true for non-zero reward",
+        );
+
+        // Edge case: zero fields but non-zero owner should NOT be considered zero
+        let non_zero_owner = contract_address_const::<0xABC>();
+        let zero_fields_non_zero_owner = RewardTrait::new(0, 0, 0, 0, non_zero_owner);
+        assert!(
+            !zero_fields_non_zero_owner.is_zero(),
+            "Reward with zero fields but non-zero owner must not be considered zero",
         );
     }
 }
