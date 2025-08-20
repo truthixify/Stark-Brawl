@@ -179,4 +179,90 @@ mod tests {
             "enemy_type() should return the correct enemy_type",
         );
     }
+
+    #[test]
+    fn test_belongs_to() {
+        let player1 = contract_address_const::<0x111>();
+        let player2 = contract_address_const::<0x222>();
+        let log = KillLogTrait::new(1, player1, 'A', 25, 1690000000_u64);
+
+        assert!(log.belongs_to(player1), "belongs_to should return true for correct player");
+        assert!(!log.belongs_to(player2), "belongs_to should return false for different player");
+    }
+
+    #[test]
+    fn test_is_enemy_type() {
+        let player = contract_address_const::<0x123>();
+        let enemy_a: felt252 = 'A';
+        let enemy_b: felt252 = 'B';
+        let log = KillLogTrait::new(2, player, enemy_a, 10, 1690000000_u64);
+
+        assert!(log.is_enemy_type(enemy_a), "is_enemy_type should return true for matching enemy");
+        assert!(
+            !log.is_enemy_type(enemy_b), "is_enemy_type should return false for different enemy",
+        );
+    }
+
+    #[test]
+    fn test_has_reward_coins_at_least() {
+        let player = contract_address_const::<0x456>();
+        let log = KillLogTrait::new(3, player, 'C', 50, 1690000000_u64);
+
+        assert!(log.has_reward_coins_at_least(40), "Should return true if reward_coins >= min");
+        assert!(log.has_reward_coins_at_least(50), "Should return true if reward_coins == min");
+        assert!(!log.has_reward_coins_at_least(60), "Should return false if reward_coins < min");
+    }
+
+    #[test]
+    fn test_time_since_kill() {
+        let player = contract_address_const::<0x789>();
+        let timestamp = 1690000000_u64;
+        let log = KillLogTrait::new(4, player, 'D', 15, timestamp);
+
+        // Now > timestamp
+        assert_eq!(
+            log.time_since_kill(1690000100_u64),
+            100,
+            "time_since_kill should return diff if now > timestamp",
+        );
+
+        // Now == timestamp
+        assert_eq!(
+            log.time_since_kill(timestamp),
+            0,
+            "time_since_kill should return 0 if now == timestamp",
+        );
+
+        // Now < timestamp (invalid, but should return 0)
+        assert_eq!(
+            log.time_since_kill(timestamp - 100),
+            0,
+            "time_since_kill should return 0 if now < timestamp",
+        );
+    }
+
+    #[test]
+    fn test_is_recent_kill() {
+        let player = contract_address_const::<0xabc>();
+        let timestamp = 1690000000_u64;
+        let log = KillLogTrait::new(5, player, 'E', 30, timestamp);
+
+        // Within threshold
+        assert!(
+            log.is_recent_kill(timestamp + 50, 100),
+            "Should be recent if time since kill <= threshold",
+        );
+
+        // Equal to threshold
+        assert!(
+            log.is_recent_kill(timestamp + 100, 100),
+            "Should be recent if time since kill == threshold",
+        );
+
+        // Outside threshold
+        assert!(
+            !log.is_recent_kill(timestamp + 101, 100),
+            "Should not be recent if time since kill > threshold",
+        );
+    }
 }
