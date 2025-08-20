@@ -60,6 +60,11 @@ trait KillLogTrait {
     ) -> KillLog;
 
     fn enemy_type(self: @KillLog) -> felt252;
+    fn belongs_to(self: @KillLog, player: ContractAddress) -> bool;
+    fn is_enemy_type(self: @KillLog, enemy: felt252) -> bool;
+    fn has_reward_coins_at_least(self: @KillLog, min: u32) -> bool;
+    fn time_since_kill(self: @KillLog, now: u64) -> u64;
+    fn is_recent_kill(self: @KillLog, now: u64, within_secs: u64) -> bool;
 }
 
 impl KillLogImpl of KillLogTrait {
@@ -75,6 +80,30 @@ impl KillLogImpl of KillLogTrait {
 
     fn enemy_type(self: @KillLog) -> felt252 {
         *self.enemy_type
+    }
+
+    fn belongs_to(self: @KillLog, player: ContractAddress) -> bool {
+        *self.player_id == player
+    }
+
+    fn is_enemy_type(self: @KillLog, enemy: felt252) -> bool {
+        *self.enemy_type == enemy
+    }
+
+    fn has_reward_coins_at_least(self: @KillLog, min: u32) -> bool {
+        *self.reward_coins >= min
+    }
+
+    fn time_since_kill(self: @KillLog, now: u64) -> u64 {
+        if now >= *self.timestamp {
+            now - *self.timestamp
+        } else {
+            0_u64
+        }
+    }
+
+    fn is_recent_kill(self: @KillLog, now: u64, within_secs: u64) -> bool {
+        Self::time_since_kill(self, now) <= within_secs
     }
 }
 
