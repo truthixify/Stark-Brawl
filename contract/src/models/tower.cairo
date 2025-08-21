@@ -49,6 +49,9 @@ pub impl TowerImpl of TowerSystem {
     }
 
     fn can_attack(self: @Tower, current_tick: u64, cooldown: u64) -> bool {
+        if current_tick < *self.last_attack_tick {
+            return false;
+        }
         current_tick - *self.last_attack_tick >= cooldown
     }
 }
@@ -129,5 +132,12 @@ mod tests {
         let t = Tower { last_attack_tick: 18_u64, ..sample_tower() };
         let ready = TowerImpl::can_attack(@t, 20_u64, 5_u64);
         assert(ready == false, 'Should not be ready');
+    }
+
+    #[test]
+    fn test_can_attack_tick_rollback() {
+        let t = Tower { last_attack_tick: 30_u64, ..sample_tower() };
+        let ready = TowerImpl::can_attack(@t, 20_u64, 10_u64);
+        assert(ready == false, 'Should not be ready on rollback');
     }
 }
