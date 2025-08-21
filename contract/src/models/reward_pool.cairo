@@ -116,7 +116,7 @@ pub impl ZeroableReward of ZeroTrait {
 
 #[cfg(test)]
 mod tests {
-    use super::{Reward, RewardPool, RewardTrait, RewardPoolTrait};
+    use super::{Reward, RewardPool, RewardTrait, RewardPoolTrait, ZeroableReward};
     use starknet::contract_address_const;
 
     #[test]
