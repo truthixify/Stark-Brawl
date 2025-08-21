@@ -1,4 +1,4 @@
-use starknet::ContractAddress;
+use starknet::{ContractAddress, contract_address_const};
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::model]
@@ -34,6 +34,12 @@ trait RewardPoolTrait {
     fn new(pool_id: u32) -> RewardPool;
     fn get_next_reward_id(ref self: RewardPool) -> u32;
     fn increment_claimed(ref self: RewardPool);
+}
+
+trait ZeroTrait {
+    fn zero() -> Reward;
+    fn is_zero(self: @Reward) -> bool;
+    fn is_non_zero(self: @Reward) -> bool;
 }
 
 impl RewardImpl of RewardTrait {
@@ -246,5 +252,4 @@ mod tests {
             "Reward with zero fields but non-zero owner must not be considered zero",
         );
     }
-
 }
