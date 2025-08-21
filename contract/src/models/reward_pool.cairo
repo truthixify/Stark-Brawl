@@ -83,6 +83,7 @@ impl RewardPoolImpl of RewardPoolTrait {
     }
 }
 
+
 pub impl ZeroableReward of ZeroTrait {
     #[inline(always)]
     fn zero() -> Reward {
@@ -115,7 +116,7 @@ pub impl ZeroableReward of ZeroTrait {
 
 #[cfg(test)]
 mod tests {
-    use super::{RewardTrait, RewardPoolTrait, ZeroableReward};
+    use super::{Reward, RewardPool, RewardTrait, RewardPoolTrait, ZeroableReward};
     use starknet::contract_address_const;
 
     #[test]
@@ -217,6 +218,7 @@ mod tests {
         assert(pool.total_rewards_created == 3, 'Should have 3 created');
         assert(pool.total_rewards_claimed == 2, 'Should have 2 claimed');
     }
+
 
     #[test]
     fn test_zeroable_reward_impl() {
