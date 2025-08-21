@@ -77,6 +77,37 @@ impl RewardPoolImpl of RewardPoolTrait {
     }
 }
 
+
+pub impl ZeroableReward of ZeroTrait {
+    #[inline(always)]
+    fn zero() -> Reward {
+        Reward {
+            reward_id: 0,
+            coins: 0,
+            gems: 0,
+            items: 0,
+            claimed: false,
+            owner: contract_address_const::<0>(),
+        }
+    }
+
+    #[inline(always)]
+    fn is_zero(self: @Reward) -> bool {
+        *self.reward_id == 0
+            && *self.coins == 0
+            && *self.gems == 0
+            && *self.items == 0
+            && !*self.claimed
+            && *self.owner == contract_address_const::<0>()
+    }
+
+    #[inline(always)]
+    fn is_non_zero(self: @Reward) -> bool {
+        !Self::is_zero(self)
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::{Reward, RewardPool, RewardTrait, RewardPoolTrait};
@@ -181,4 +212,39 @@ mod tests {
         assert(pool.total_rewards_created == 3, 'Should have 3 created');
         assert(pool.total_rewards_claimed == 2, 'Should have 2 claimed');
     }
+
+
+    #[test]
+    fn test_zeroable_reward_impl() {
+        let zero_reward = ZeroableReward::zero();
+
+        assert!(zero_reward.reward_id == 0, "Zero reward_id should be 0");
+        assert!(zero_reward.coins == 0, "Zero coins should be 0");
+        assert!(zero_reward.gems == 0, "Zero gems should be 0");
+        assert!(zero_reward.items == 0, "Zero items should be 0");
+        assert!(!zero_reward.claimed, "Zero claimed should be false");
+        assert!(
+            zero_reward.owner == contract_address_const::<0>(), "Zero owner should be zero address",
+        );
+
+        assert!(zero_reward.is_zero(), "is_zero should return true for zero reward");
+        assert!(!zero_reward.is_non_zero(), "is_non_zero should return false for zero reward");
+
+        let owner = contract_address_const::<0x123>();
+        let non_zero_reward = RewardTrait::new(1, 10, 0, 0, owner);
+
+        assert!(!non_zero_reward.is_zero(), "is_zero should return false for non-zero reward");
+        assert!(
+            non_zero_reward.is_non_zero(), "is_non_zero should return true for non-zero reward",
+        );
+
+        // Edge case: zero fields but non-zero owner should NOT be considered zero
+        let non_zero_owner = contract_address_const::<0xABC>();
+        let zero_fields_non_zero_owner = RewardTrait::new(0, 0, 0, 0, non_zero_owner);
+        assert!(
+            !zero_fields_non_zero_owner.is_zero(),
+            "Reward with zero fields but non-zero owner must not be considered zero",
+        );
+    }
+
 }
