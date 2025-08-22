@@ -1,4 +1,5 @@
 use core::num::traits::zero::Zero;
+use core::result::Result;
 
 #[derive(Copy, Drop, Serde, IntrospectPacked, Debug, PartialEq)]
 #[dojo::model]
@@ -20,6 +21,10 @@ mod errors {
     pub const Overkill: felt252 = 'Overkill';
     pub const ReviveError: felt252 = 'ReviveError';
     pub const InvalidMove: felt252 = 'InvalidMove';
+    pub const InvalidCoinReward: felt252 = 'InvalidCoinReward';
+    pub const InvalidXpReward: felt252 = 'InvalidXpReward';
+    pub const InvalidHealth: felt252 = 'InvalidHealth';
+    pub const InvalidSpeed: felt252 = 'InvalidSpeed';
 }
 
 #[generate_trait]
@@ -33,7 +38,7 @@ pub trait EnemySystem {
         y: u32,
         coin_reward: u32,
         xp_reward: u32,
-    ) -> Enemy;
+    ) -> Result<Enemy, felt252>;
     fn take_damage(self: @Enemy, amount: u32) -> Enemy;
     fn move_to(self: @Enemy, x: u32, y: u32) -> Enemy;
 }
@@ -48,11 +53,22 @@ pub impl EnemyImpl of EnemySystem {
         y: u32,
         coin_reward: u32,
         xp_reward: u32,
-    ) -> Enemy {
-        assert(coin_reward > 0_u32, 'coin_reward must be > 0');
-        assert(xp_reward > 0_u32, 'xp_reward must be > 0');
+    ) -> Result<Enemy, felt252> {
+        if coin_reward == 0_u32 {
+            return Result::Err(errors::InvalidCoinReward);
+        }
+        if xp_reward == 0_u32 {
+            return Result::Err(errors::InvalidXpReward);
+        }
 
-        Enemy {
+        if health == 0_u32 {
+            return Result::Err(errors::InvalidHealth);
+        }
+        if speed == 0_u32 {
+            return Result::Err(errors::InvalidSpeed);
+        }
+
+        Result::Ok(Enemy {
             id,
             enemy_type,
             health,
@@ -62,8 +78,8 @@ pub impl EnemyImpl of EnemySystem {
             is_alive: true,
             coin_reward,
             xp_reward,
-            reward_claimed: false // Initialize as false
-        }
+            reward_claimed: false
+        })
     }
 
     fn take_damage(self: @Enemy, amount: u32) -> Enemy {
@@ -143,7 +159,7 @@ mod tests {
     use super::*;
 
     fn sample_enemy() -> Enemy {
-        EnemyImpl::new(1_u64, 'orc', 100_u32, 5_u32, 10_u32, 20_u32, 10_u32, 50_u32)
+        EnemyImpl::new(1_u64, 'orc', 100_u32, 5_u32, 10_u32, 20_u32, 10_u32, 50_u32).unwrap()
     }
 
     #[test]
@@ -188,5 +204,46 @@ mod tests {
         let e = sample_enemy();
         let dead = EnemyImpl::take_damage(@e, 200_u32);
         let _ = EnemyImpl::move_to(@dead, 50_u32, 60_u32);
+    }
+
+    #[test]
+    fn test_new_invalid_coin_reward() {
+        let result = EnemyImpl::new(1_u64, 'orc', 100_u32, 5_u32, 10_u32, 20_u32, 0_u32, 50_u32);
+        assert(result.is_err(), 'Should return error');
+        assert(result.unwrap_err() == errors::InvalidCoinReward, 'Wrong error type');
+    }
+
+    #[test]
+    fn test_new_invalid_xp_reward() {
+        let result = EnemyImpl::new(1_u64, 'orc', 100_u32, 5_u32, 10_u32, 20_u32, 10_u32, 0_u32);
+        assert(result.is_err(), 'Should return error');
+        assert(result.unwrap_err() == errors::InvalidXpReward, 'Wrong error type');
+    }
+
+    #[test]
+    fn test_new_invalid_health() {
+        let result = EnemyImpl::new(1_u64, 'orc', 0_u32, 5_u32, 10_u32, 20_u32, 10_u32, 50_u32);
+        assert(result.is_err(), 'Should return error');
+        assert(result.unwrap_err() == errors::InvalidHealth, 'Wrong error type');
+    }
+
+    #[test]
+    fn test_new_invalid_speed() {
+        let result = EnemyImpl::new(1_u64, 'orc', 100_u32, 0_u32, 10_u32, 20_u32, 10_u32, 50_u32);
+        assert(result.is_err(), 'Should return error');
+        assert(result.unwrap_err() == errors::InvalidSpeed, 'Wrong error type');
+    }
+
+    #[test]
+    fn test_new_valid_parameters() {
+        let result = EnemyImpl::new(1_u64, 'orc', 100_u32, 5_u32, 10_u32, 20_u32, 10_u32, 50_u32);
+        assert(result.is_ok(), 'Should succeed');
+        let enemy = result.unwrap();
+        assert(enemy.health == 100_u32, 'Incorrect health');
+        assert(enemy.speed == 5_u32, 'Incorrect speed');
+        assert(enemy.coin_reward == 10_u32, 'Incorrect coin reward');
+        assert(enemy.xp_reward == 50_u32, 'Incorrect xp reward');
+        assert(enemy.is_alive == true, 'Should be alive');
+        assert(enemy.reward_claimed == false, 'Should not be claimed');
     }
 }

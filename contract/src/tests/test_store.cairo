@@ -110,7 +110,7 @@ mod tests {
     }
 
     fn create_sample_enemy() -> Enemy {
-        EnemyImpl::new(1_u64, 'goblin', 100_u32, 5_u32, 10_u32, 20_u32, 10_u32, 50_u32)
+        EnemyImpl::new(1_u64, 'goblin', 100_u32, 5_u32, 10_u32, 20_u32, 10_u32, 50_u32).unwrap()
     }
 
     fn create_sample_tower() -> Tower {
@@ -1149,8 +1149,8 @@ mod tests {
         store.write_player(@player_a);
         store.write_player(@player_b);
 
-        let mut enemy_1 = EnemyImpl::new(1, 'goblin', 50, 5, 0, 0, 10, 20);
-        let mut enemy_2 = EnemyImpl::new(2, 'orc', 100, 3, 0, 0, 25, 50);
+        let mut enemy_1 = EnemyImpl::new(1, 'goblin', 50, 5, 0, 0, 10, 20).unwrap();
+        let mut enemy_2 = EnemyImpl::new(2, 'orc', 100, 3, 0, 0, 25, 50).unwrap();
         enemy_1.is_alive = false;
         enemy_2.is_alive = false;
         store.write_enemy(@enemy_1);

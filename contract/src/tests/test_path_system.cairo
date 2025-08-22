@@ -4,7 +4,7 @@ mod path_system_tests {
     use stark_brawl::models::enemy::{Enemy, EnemySystem};
 
     fn sample_enemy() -> Enemy {
-        EnemySystem::new(1_u64, 'orc', 100_u32, 5_u32, 0_u32, 0_u32, 10_u32, 50_u32)
+        EnemySystem::new(1_u64, 'orc', 100_u32, 5_u32, 0_u32, 0_u32, 10_u32, 50_u32).unwrap()
     }
 
     #[test]
