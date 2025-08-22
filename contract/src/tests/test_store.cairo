@@ -382,6 +382,61 @@ mod tests {
         store.update_enemy_health(1_u64, 10_u32);
     }
 
+    #[test]
+    fn test_damage_enemy_death_detection() {
+        let player_system_contract_address = create_test_player_system();
+        let world = create_test_world(player_system_contract_address);
+        let mut store = StoreTrait::new(world);
+
+        let enemy = create_sample_enemy();
+        store.spawn_enemy(enemy);
+
+        // Damage enemy less than health
+        let (is_dead, coins, xp) = store.damage_enemy(enemy.id, 50);
+        assert!(!is_dead, "Enemy alive");
+        assert_eq!(coins, 0, "Coins 0 if alive");
+        assert_eq!(xp, 0, "XP 0 if alive");
+
+        // Damage enemy to death
+        let (is_dead, coins, xp) = store.damage_enemy(enemy.id, 50);
+        assert!(is_dead, "Enemy dead");
+        assert_eq!(coins, enemy.coin_reward, "Coins reward");
+        assert_eq!(xp, enemy.xp_reward, "XP reward");
+    }
+
+    #[test]
+    #[should_panic(expected: 'Enemy is dead')]
+    fn test_damage_enemy_overkill_panics() {
+        let player_system_contract_address = create_test_player_system();
+        let world = create_test_world(player_system_contract_address);
+        let mut store = StoreTrait::new(world);
+        let enemy = create_sample_enemy();
+        store.spawn_enemy(enemy);
+
+        // Kill enemy
+        store.damage_enemy(enemy.id, enemy.health);
+
+        store.damage_enemy(enemy.id, 10);
+    }
+
+    #[test]
+    fn test_damage_enemy_accumulative_damage_kill() {
+        let player_system_contract_address = create_test_player_system();
+        let world = create_test_world(player_system_contract_address);
+        let mut store = StoreTrait::new(world);
+        let enemy = create_sample_enemy();
+        store.spawn_enemy(enemy);
+
+        let (is_dead_first, _, _) = store.damage_enemy(enemy.id, 30);
+        assert!(!is_dead_first, "Alive after first damage");
+
+        let (is_dead_second, coins, xp) = store.damage_enemy(enemy.id, 70);
+        assert!(is_dead_second, "Dead after cumulative damage");
+        assert_eq!(coins, enemy.coin_reward, "Coins reward");
+        assert_eq!(xp, enemy.xp_reward, "XP reward");
+    }
+
+
     // -------------------------------
     // Tower Management Tests
     // -------------------------------
@@ -1140,6 +1195,106 @@ mod tests {
 
         let final_enemy_2 = store.read_enemy(enemy_2.id);
         assert!(final_enemy_2.reward_claimed == true, "Enemy 2 reward should now be claimed");
+    }
+
+
+    // -------------------------------
+    // Waves function Tests
+    // -------------------------------
+
+    #[test]
+    fn test_read_and_write_wave() {
+        let player_system_contract_address = create_test_player_system();
+        let world = create_test_world(player_system_contract_address);
+        let mut store = StoreTrait::new(world);
+
+        let wave = create_sample_wave();
+        store.write_wave(@wave);
+
+        let read_wave = store.read_wave(wave.id);
+
+        assert_eq!(read_wave.id, wave.id, "Wave ID mismatch");
+        assert_eq!(read_wave.level, wave.level, "Wave level mismatch");
+        assert_eq!(read_wave.enemy_count, wave.enemy_count, "Enemy count mismatch");
+        assert_eq!(read_wave.tick_interval, wave.tick_interval, "Tick interval mismatch");
+        assert!(!read_wave.is_active, "Wave should not be active initially");
+        assert!(!read_wave.is_completed, "Wave should not be completed initially");
+    }
+
+    #[test]
+    fn test_start_wave() {
+        let player_system_contract_address = create_test_player_system();
+        let world = create_test_world(player_system_contract_address);
+        let mut store = StoreTrait::new(world);
+
+        let wave = create_sample_wave();
+        store.write_wave(@wave);
+
+        store.start_wave(wave.id, 200_u64);
+
+        let started_wave = store.read_wave(wave.id);
+
+        assert!(started_wave.is_active, "Wave should be active after start");
+        assert_eq!(
+            started_wave.last_spawn_tick, 200_u64, "Last spawn tick should be set to start tick",
+        );
+    }
+
+    #[test]
+    fn test_register_enemy_spawn() {
+        let player_system_contract_address = create_test_player_system();
+        let world = create_test_world(player_system_contract_address);
+        let mut store = StoreTrait::new(world);
+
+        let wave = create_sample_wave();
+        store.write_wave(@wave);
+        store.start_wave(wave.id, 200_u64);
+
+        store.register_enemy_spawn(wave.id, 300_u64);
+
+        let updated_wave = store.read_wave(wave.id);
+
+        assert_eq!(updated_wave.enemies_spawned, 1_u32, "Enemies spawned should increment");
+        assert_eq!(updated_wave.last_spawn_tick, 300_u64, "Last spawn tick should update");
+    }
+
+    #[test]
+    fn test_complete_wave() {
+        let player_system_contract_address = create_test_player_system();
+        let world = create_test_world(player_system_contract_address);
+        let mut store = StoreTrait::new(world);
+
+        let wave = create_sample_wave();
+        store.write_wave(@wave);
+        store.start_wave(wave.id, 200_u64);
+
+        store.complete_wave(wave.id);
+
+        let completed_wave = store.read_wave(wave.id);
+
+        assert!(!completed_wave.is_active, "Wave should not be active after completion");
+        assert!(completed_wave.is_completed, "Wave should be completed");
+    }
+
+    #[test]
+    fn test_is_wave_completed() {
+        let player_system_contract_address = create_test_player_system();
+        let world = create_test_world(player_system_contract_address);
+        let mut store = StoreTrait::new(world);
+
+        let wave = create_sample_wave();
+        store.write_wave(@wave);
+
+        // Initially not completed
+        assert!(!store.is_wave_completed(wave.id), "Wave should not be marked completed initially");
+
+        store.start_wave(wave.id, 100_u64);
+        // Manually mark wave completed for test purposes (or call complete_wave)
+        store.complete_wave(wave.id);
+
+        assert!(
+            store.is_wave_completed(wave.id), "Wave should be marked completed after completion",
+        );
     }
 }
 

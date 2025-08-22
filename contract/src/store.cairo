@@ -135,6 +135,13 @@ pub impl StoreImpl of StoreTrait {
         self.write_wave(@completed_wave)
     }
 
+    //@ryzen-xp
+    #[inline]
+    fn is_wave_completed(ref self: Store, wave_id: u64) -> bool {
+        let mut wave = self.read_wave(wave_id);
+        WaveImpl::is_wave_completed(@wave)
+    }
+
     // -------------------------------
     // Enemy operations
     // -------------------------------
@@ -170,6 +177,21 @@ pub impl StoreImpl of StoreTrait {
         assert(enemy.is_alive == true, 'Enemy is dead');
         let moved_enemy = EnemyImpl::move_to(@enemy, x, y);
         self.write_enemy(@moved_enemy);
+    }
+
+    //@ryzen-xp
+    #[inline]
+    fn damage_enemy(ref self: Store, enemy_id: u64, amount: u32) -> (bool, u32, u32) {
+        let enemy: Enemy = self.read_enemy(enemy_id);
+        assert(enemy.is_alive == true, 'Enemy is dead');
+        let damaged_enemy = EnemyImpl::take_damage(@enemy, amount);
+        self.write_enemy(@damaged_enemy);
+
+        if !damaged_enemy.is_alive {
+            (true, damaged_enemy.coin_reward, damaged_enemy.xp_reward)
+        } else {
+            (false, 0, 0)
+        }
     }
 
     // -------------------------------
