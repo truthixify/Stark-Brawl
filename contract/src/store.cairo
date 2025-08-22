@@ -14,6 +14,7 @@ use stark_brawl::models::leaderboard::{
     LeaderboardEntry, ILeaderboardEntry, ZeroableLeaderboardEntry,
 };
 use starknet::ContractAddress;
+use core::num::traits::Zero;
 
 #[derive(Drop)]
 pub struct Store {
@@ -97,6 +98,7 @@ pub impl StoreImpl of StoreTrait {
     #[inline(always)]
     fn player_system_client(self: @Store) -> IPlayerSystemDispatcher {
         let contract: PlayerContract = self.world.read_model('PLAYER_CONTRACT');
+        assert!(contract.contract.is_non_zero(), "PlayerSystem_contract_not_configured");
         IPlayerSystemDispatcher { contract_address: contract.contract }
     }
 
