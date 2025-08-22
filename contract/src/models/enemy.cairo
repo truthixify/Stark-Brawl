@@ -158,13 +158,15 @@ pub impl ZeroableEnemy of Zero<Enemy> {
 mod tests {
     use super::*;
 
-    fn sample_enemy() -> Enemy {
-        EnemyImpl::new(1_u64, 'orc', 100_u32, 5_u32, 10_u32, 20_u32, 10_u32, 50_u32).unwrap()
+    fn sample_enemy() -> Result<Enemy, felt252> {
+        EnemyImpl::new(1_u64, 'orc', 100_u32, 5_u32, 10_u32, 20_u32, 10_u32, 50_u32)
     }
 
     #[test]
     fn test_instantiation() {
-        let e = sample_enemy();
+        let result = sample_enemy();
+        assert(result.is_ok(), 'Should create valid enemy');
+        let e = result.unwrap();
         assert(e.health == 100_u32, 'Incorrect health');
         assert(e.is_alive == true, 'Should be alive');
         assert(e.enemy_type == 'orc', 'Incorrect type');
@@ -174,7 +176,7 @@ mod tests {
 
     #[test]
     fn test_take_damage_kills() {
-        let e = sample_enemy();
+        let e = sample_enemy().unwrap();
         let e2 = EnemyImpl::take_damage(@e, 100_u32);
         assert(e2.health == 0_u32, 'Health 0');
         assert(e2.is_alive == false, 'Dead');
@@ -185,14 +187,14 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_take_damage_on_dead_enemy_panics() {
-        let e = sample_enemy();
+        let e = sample_enemy().unwrap();
         let dead = EnemyImpl::take_damage(@e, 100_u32);
         let _ = EnemyImpl::take_damage(@dead, 10_u32);
     }
 
     #[test]
     fn test_move_alive_enemy() {
-        let e = sample_enemy();
+        let e = sample_enemy().unwrap();
         let e2 = EnemyImpl::move_to(@e, 30_u32, 40_u32);
         assert(e2.x == 30_u32, 'Incorrect x');
         assert(e2.y == 40_u32, 'Incorrect y');
@@ -201,7 +203,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_move_dead_enemy_panics() {
-        let e = sample_enemy();
+        let e = sample_enemy().unwrap();
         let dead = EnemyImpl::take_damage(@e, 200_u32);
         let _ = EnemyImpl::move_to(@dead, 50_u32, 60_u32);
     }
