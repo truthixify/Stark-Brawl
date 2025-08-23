@@ -24,6 +24,16 @@ pub trait IPlayerSystem<T> {
     fn get_gems(self: @T, player_address: ContractAddress) -> u64;
     fn get_equipped_ability(self: @T, player_address: ContractAddress) -> u256;
     fn get_active_towers(self: @T, player_address: ContractAddress) -> u8;
+
+    fn get_mana(self: @T, player_address: ContractAddress) -> u8;
+    fn get_max_mana(self: @T, player_address: ContractAddress) -> u8;
+    fn spend_mana(ref self: T, player_address: ContractAddress, amount: u8);
+    fn regenerate_mana(ref self: T, player_address: ContractAddress, amount: u8);
+    fn get_ability_cooldown(self: @T, player_address: ContractAddress, ability_id: u256) -> u64;
+    fn set_ability_cooldown(
+        ref self: T, player_address: ContractAddress, ability_id: u256, cooldown_until: u64,
+    );
+    fn has_ability_equipped(self: @T, player_address: ContractAddress, ability_id: u256) -> bool;
 }
 
 #[dojo::contract]
@@ -43,6 +53,11 @@ pub mod player_system {
         gems: Map<ContractAddress, u64>,
         equipped_ability: Map<ContractAddress, u256>,
         active_towers: Map<ContractAddress, u8>,
+        mana: Map<ContractAddress, u8>,
+        max_mana: Map<ContractAddress, u8>,
+        ability_cooldowns: Map<
+            (ContractAddress, u256), u64,
+        > // (player, ability_id) -> cooldown_until_timestamp
     }
 
     #[abi(embed_v0)]
@@ -55,6 +70,8 @@ pub mod player_system {
             self.gems.entry(player_address).write(0);
             self.equipped_ability.entry(player_address).write(0);
             self.active_towers.entry(player_address).write(0);
+            self.mana.entry(player_address).write(100);
+            self.max_mana.entry(player_address).write(100);
         }
 
         // Combat
@@ -143,6 +160,49 @@ pub mod player_system {
 
         fn get_active_towers(self: @ContractState, player_address: ContractAddress) -> u8 {
             self.active_towers.entry(player_address).read()
+        }
+
+        fn get_mana(self: @ContractState, player_address: ContractAddress) -> u8 {
+            self.mana.entry(player_address).read()
+        }
+
+        fn get_max_mana(self: @ContractState, player_address: ContractAddress) -> u8 {
+            self.max_mana.entry(player_address).read()
+        }
+
+        fn spend_mana(ref self: ContractState, player_address: ContractAddress, amount: u8) {
+            let current_mana = self.mana.entry(player_address).read();
+            assert(current_mana >= amount, 'Player: Not enough mana');
+            self.mana.entry(player_address).write(current_mana - amount);
+        }
+
+        fn regenerate_mana(ref self: ContractState, player_address: ContractAddress, amount: u8) {
+            let current_mana = self.mana.entry(player_address).read();
+            let max_mana = self.max_mana.entry(player_address).read();
+            let new_mana = core::cmp::min(current_mana + amount, max_mana);
+            self.mana.entry(player_address).write(new_mana);
+        }
+
+        fn get_ability_cooldown(
+            self: @ContractState, player_address: ContractAddress, ability_id: u256,
+        ) -> u64 {
+            self.ability_cooldowns.entry((player_address, ability_id)).read()
+        }
+
+        fn set_ability_cooldown(
+            ref self: ContractState,
+            player_address: ContractAddress,
+            ability_id: u256,
+            cooldown_until: u64,
+        ) {
+            self.ability_cooldowns.entry((player_address, ability_id)).write(cooldown_until);
+        }
+
+        fn has_ability_equipped(
+            self: @ContractState, player_address: ContractAddress, ability_id: u256,
+        ) -> bool {
+            let equipped_ability = self.equipped_ability.entry(player_address).read();
+            equipped_ability == ability_id && ability_id != 0
         }
     }
 }
