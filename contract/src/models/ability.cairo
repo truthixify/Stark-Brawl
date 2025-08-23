@@ -339,6 +339,66 @@ mod tests {
     }
 
     #[test]
+    fn test_is_usable_true() {
+        let ability = sample_ability();
+        assert(ability.is_usable(5, 25), 'Ability should be usable');
+    }
+
+    #[test]
+    fn test_is_usable_false_level() {
+        let ability = sample_ability();
+        assert(!ability.is_usable(2, 25), 'Level too low');
+    }
+
+    #[test]
+    fn test_is_usable_false_mana() {
+        let ability = sample_ability();
+        assert(!ability.is_usable(5, 10), 'Not enough mana');
+    }
+
+    #[test]
+    fn test_validate_success() {
+        let ability = sample_ability();
+        ability.validate(5, 25);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Ability: Power must be > 0',))]
+    fn test_invalid_power() {
+        let mut ability = sample_ability();
+        ability.power = 0_u256;
+        ability.validate(5, 25);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Ability: Cooldown too high',))]
+    fn test_invalid_cooldown() {
+        let mut ability = sample_ability();
+        ability.cooldown = 12;
+        ability.validate(5, 25);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Ability: Level too low',))]
+    fn test_invalid_level() {
+        let ability = sample_ability();
+        ability.validate(2, 25);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Ability: Not enough mana',))]
+    fn test_invalid_mana() {
+        let ability = sample_ability();
+        ability.validate(5, 10);
+    }
+
+    #[test]
+    fn test_zero_ability() {
+        let ability = ZeroableAbilityTrait::zero();
+        assert(ability.is_zero(), 'Zero ability should be zero');
+    }
+
+    #[test]
     fn test_ability_type_conversions() {
         let fireball_felt: felt252 = AbilityType::Fireball.into();
         assert(fireball_felt == 'Fireball', 'Conversion to felt252 failed');
