@@ -59,11 +59,14 @@ pub impl TrapImpl of TrapTrait {
     }
 
     fn trigger(ref self: Trap) -> u16 {
+        // Check if the trap is active before modifying its state.
+        // If it's not active, we immediately return 0, preventing any side effects.
         if !self.is_active {
             return 0;
         }
 
-        self.is_active = false; // Trap is consumed after triggering
+        // If it is active, deactivate it and return its damage.
+        self.is_active = false;
         self.damage
     }
 
