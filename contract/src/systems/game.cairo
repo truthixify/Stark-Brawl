@@ -40,6 +40,7 @@ pub mod brawl_game {
         Ability, AbilityTrait, AbilityUsageContext, AbilityEffectType,
     };
     use stark_brawl::models::player::{Player, PlayerTrait, spawn_player, ZeroablePlayerTrait};
+
     use stark_brawl::models::item::{Item, ItemType};
     use stark_brawl::models::inventory::{Inventory};
     use stark_brawl::models::enemy::{Enemy, EnemySystem};
@@ -121,11 +122,10 @@ pub mod brawl_game {
         }
 
         fn take_damage(ref self: ContractState, amount: u32) {
-            let mut world = self.world_default();
-            let caller = get_caller_address();
+            // let mut world = self.world_default();
             let player_system_dispatcher = self.player_system_dispatcher();
 
-            player_system_dispatcher.take_damage(caller, amount.try_into().unwrap());
+            player_system_dispatcher.take_damage(get_caller_address(), amount.try_into().unwrap());
         }
 
         fn attack_enemy(ref self: ContractState, enemy_id: u64, damage: u32) {
@@ -158,7 +158,6 @@ pub mod brawl_game {
         }
 
         fn get_player_status(ref self: ContractState) -> PlayerStatus {
-            let world = self.world_default();
             let caller = get_caller_address();
             let player_system_dispatcher = self.player_system_dispatcher();
 
