@@ -3,8 +3,14 @@ mod path_system_tests {
     use stark_brawl::systems::game::brawl_game::{PathSystemImpl};
     use stark_brawl::models::enemy::{Enemy, EnemySystem};
 
-    fn sample_enemy() -> Enemy {
+    fn sample_enemy() -> Result<Enemy, felt252> {
         EnemySystem::new(1_u64, 'orc', 100_u32, 5_u32, 0_u32, 0_u32, 10_u32, 50_u32)
+    }
+
+    fn enemy_ok() -> Enemy {
+        let res = sample_enemy();
+        assert(res.is_ok(), 'invalid enemy');
+        res.unwrap()
     }
 
     #[test]
@@ -89,7 +95,7 @@ mod path_system_tests {
 
     #[test]
     fn test_advance_enemy_position_normal_movement() {
-        let mut enemy = sample_enemy();
+        let mut enemy = enemy_ok();
 
         // Move enemy to start of path 0
         enemy = EnemySystem::move_to(@enemy, 0_u32, 5_u32);
@@ -104,7 +110,7 @@ mod path_system_tests {
 
     #[test]
     fn test_advance_enemy_position_path_completion() {
-        let mut enemy = sample_enemy();
+        let mut enemy = enemy_ok();
 
         // Move enemy to the last position of path 0 (index 5)
         enemy = EnemySystem::move_to(@enemy, 5_u32, 5_u32);
@@ -119,7 +125,7 @@ mod path_system_tests {
 
     #[test]
     fn test_advance_enemy_position_multiple_steps() {
-        let mut enemy = sample_enemy();
+        let mut enemy = enemy_ok();
 
         // Start enemy at path 1 beginning (updated from path 2)
         enemy = EnemySystem::move_to(@enemy, 0_u32, 0_u32);
@@ -141,7 +147,7 @@ mod path_system_tests {
     #[test]
     #[should_panic]
     fn test_advance_dead_enemy_panics() {
-        let mut enemy = sample_enemy();
+        let mut enemy = enemy_ok();
 
         // Kill the enemy
         enemy = EnemySystem::take_damage(@enemy, 100_u32);
@@ -153,7 +159,7 @@ mod path_system_tests {
 
     #[test]
     fn test_zigzag_path_movement() {
-        let mut enemy = sample_enemy();
+        let mut enemy = enemy_ok();
 
         // Test zigzag path (path 2) movement
         enemy = EnemySystem::move_to(@enemy, 0_u32, 2_u32); // Start position

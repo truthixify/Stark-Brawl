@@ -111,8 +111,14 @@ mod tests {
         spawn_player(contract_address_const::<0x12345678>())
     }
 
-    fn create_sample_enemy() -> Enemy {
+    fn create_sample_enemy() -> Result<Enemy, felt252> {
         EnemyImpl::new(1_u64, 'goblin', 100_u32, 5_u32, 10_u32, 20_u32, 10_u32, 50_u32)
+    }
+
+    fn enemy_ok() -> Enemy {
+        let res = create_sample_enemy();
+        assert(res.is_ok(), 'invalid enemy');
+        res.unwrap()
     }
 
     fn create_sample_tower() -> Tower {
@@ -292,7 +298,7 @@ mod tests {
         let world = create_test_world(player_system_contract_address);
         let mut store: Store = StoreTrait::new(world);
 
-        let enemy = create_sample_enemy();
+        let enemy = enemy_ok();
         store.spawn_enemy(enemy);
 
         let enemy = store.read_enemy(1_u64);
@@ -314,7 +320,7 @@ mod tests {
         let world = create_test_world(player_system_contract_address);
         let mut store: Store = StoreTrait::new(world);
 
-        let enemy = create_sample_enemy();
+        let enemy = enemy_ok();
         store.spawn_enemy(enemy);
 
         store.update_enemy_health(1_u64, 20_u32);
@@ -338,7 +344,7 @@ mod tests {
         let world = create_test_world(player_system_contract_address);
         let mut store: Store = StoreTrait::new(world);
 
-        let enemy = create_sample_enemy();
+        let enemy = enemy_ok();
         store.spawn_enemy(enemy);
 
         store.move_enemy(1_u64, 30_u32, 50_u32);
@@ -363,7 +369,7 @@ mod tests {
         let world = create_test_world(player_system_contract_address);
         let mut store: Store = StoreTrait::new(world);
 
-        let enemy = create_sample_enemy();
+        let enemy = enemy_ok();
         store.spawn_enemy(enemy);
 
         store.update_enemy_health(1_u64, 100_u32);
@@ -377,7 +383,7 @@ mod tests {
         let world = create_test_world(player_system_contract_address);
         let mut store: Store = StoreTrait::new(world);
 
-        let enemy = create_sample_enemy();
+        let enemy = enemy_ok();
         store.spawn_enemy(enemy);
 
         store.update_enemy_health(1_u64, 100_u32);
@@ -390,7 +396,7 @@ mod tests {
         let world = create_test_world(player_system_contract_address);
         let mut store = StoreTrait::new(world);
 
-        let enemy = create_sample_enemy();
+        let enemy = enemy_ok();
         store.spawn_enemy(enemy);
 
         // Damage enemy less than health
@@ -412,7 +418,7 @@ mod tests {
         let player_system_contract_address = create_test_player_system();
         let world = create_test_world(player_system_contract_address);
         let mut store = StoreTrait::new(world);
-        let enemy = create_sample_enemy();
+        let enemy = enemy_ok();
         store.spawn_enemy(enemy);
 
         // Kill enemy
@@ -426,7 +432,7 @@ mod tests {
         let player_system_contract_address = create_test_player_system();
         let world = create_test_world(player_system_contract_address);
         let mut store = StoreTrait::new(world);
-        let enemy = create_sample_enemy();
+        let enemy = enemy_ok();
         store.spawn_enemy(enemy);
 
         let (is_dead_first, _, _) = store.damage_enemy(enemy.id, 30);
@@ -1040,7 +1046,7 @@ mod tests {
         let initial_xp = player.xp;
         // store.write_player(@player);
 
-        let mut enemy = create_sample_enemy();
+        let mut enemy = enemy_ok();
         enemy.is_alive = false; // Manually set as defeated
         store.write_enemy(@enemy);
 
@@ -1074,7 +1080,7 @@ mod tests {
         let player = create_sample_player();
         store.write_player(@player);
 
-        let enemy = create_sample_enemy(); // is_alive is true by default
+        let enemy = enemy_ok(); // is_alive is true by default
         store.write_enemy(@enemy);
 
         // Action: Attempt to distribute rewards for a live enemy (should panic)
@@ -1094,7 +1100,7 @@ mod tests {
         // Setup
         let player = create_sample_player();
         store.write_player(@player);
-        let mut enemy = create_sample_enemy();
+        let mut enemy = enemy_ok();
         enemy.is_alive = false;
         store.write_enemy(@enemy);
 
@@ -1120,7 +1126,7 @@ mod tests {
         player.xp = 0;
         store.write_player(@player);
 
-        let mut enemy = create_sample_enemy();
+        let mut enemy = enemy_ok();
         enemy.is_alive = false;
         store.write_enemy(@enemy);
 
@@ -1151,8 +1157,8 @@ mod tests {
         store.write_player(@player_a);
         store.write_player(@player_b);
 
-        let mut enemy_1 = EnemyImpl::new(1, 'goblin', 50, 5, 0, 0, 10, 20);
-        let mut enemy_2 = EnemyImpl::new(2, 'orc', 100, 3, 0, 0, 25, 50);
+        let mut enemy_1 = EnemyImpl::new(1, 'goblin', 50, 5, 0, 0, 10, 20).unwrap();
+        let mut enemy_2 = EnemyImpl::new(2, 'orc', 100, 3, 0, 0, 25, 50).unwrap();
         enemy_1.is_alive = false;
         enemy_2.is_alive = false;
         store.write_enemy(@enemy_1);

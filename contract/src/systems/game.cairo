@@ -8,6 +8,15 @@ pub trait IBrawlGame<T> {
     fn attack_enemy(ref self: T, enemy_id: u64, damage: u32);
     fn get_player_status(ref self: T) -> PlayerStatus;
     fn use_item(ref self: T, item_id: u32);
+    fn create_ability(
+        ref self: T,
+        ability_id: u256,
+        ability_type: felt252,
+        power: u256,
+        cooldown: u8,
+        mana_cost: u8,
+        level_required: u8,
+    ) -> u256;
 }
 
 #[derive(Copy, Drop, Serde)]
@@ -22,15 +31,16 @@ pub enum PlayerStatus {
 #[dojo::contract]
 pub mod brawl_game {
     use super::{IBrawlGame, PlayerStatus};
-    use starknet::{ContractAddress, get_caller_address};
     use starknet::storage::{StoragePointerWriteAccess, StoragePointerReadAccess};
-
+    use starknet::{ContractAddress, get_caller_address, get_block_timestamp};
 
     use dojo::model::{ModelStorage};
 
+    use stark_brawl::models::ability::{
+        Ability, AbilityTrait, AbilityUsageContext, AbilityEffectType,
+    };
+    use stark_brawl::models::player::{Player, PlayerTrait, spawn_player, ZeroablePlayerTrait};
 
-    use stark_brawl::models::player::{Player, spawn_player};
-    use stark_brawl::models::ability::{Ability};
     use stark_brawl::models::item::{Item, ItemType};
     use stark_brawl::models::inventory::{Inventory};
     use stark_brawl::models::enemy::{Enemy, EnemySystem};
@@ -65,11 +75,50 @@ pub mod brawl_game {
         fn use_ability(ref self: ContractState, ability_id: u32, target_id: ContractAddress) {
             let mut world = self.world_default();
             let caller = get_caller_address();
+            let current_timestamp = get_block_timestamp();
+            let player_system_dispatcher = self.player_system_dispatcher();
 
-            let mut player: Player = world.read_model(caller);
-            let _ability: Ability = world.read_model(ability_id);
+            let player: Player = world.read_model(caller);
+            let ability: Ability = world.read_model(ability_id);
 
-            world.write_model(@player);
+            // Gather validation data
+            let player_level = player.level;
+            let player_mana = player_system_dispatcher.get_mana(caller);
+            let cooldown_until = player_system_dispatcher
+                .get_ability_cooldown(caller, ability_id.into());
+            let is_player_alive = player_system_dispatcher.is_alive(caller);
+            let is_ability_equipped = player_system_dispatcher
+                .has_ability_equipped(caller, ability_id.into());
+            let is_target_valid = self.validate_target(target_id);
+
+            // Create usage context
+            let context = AbilityUsageContext {
+                ability_id: ability_id.into(), caster: caller, target: target_id, current_timestamp,
+            };
+
+            // Process the ability usage
+            let usage_result = ability
+                .process_usage(
+                    context,
+                    player_level,
+                    player_mana,
+                    cooldown_until,
+                    is_player_alive,
+                    is_ability_equipped,
+                    is_target_valid,
+                );
+
+            // Apply costs and effects
+            player_system_dispatcher.spend_mana(caller, usage_result.mana_consumed);
+            player_system_dispatcher
+                .set_ability_cooldown(caller, ability_id.into(), usage_result.cooldown_until);
+            self
+                .apply_ability_effect(
+                    usage_result.effect_type,
+                    usage_result.effect_amount,
+                    target_id,
+                    is_target_valid,
+                );
         }
 
         fn take_damage(ref self: ContractState, amount: u32) {
@@ -136,6 +185,26 @@ pub mod brawl_game {
             }
 
             world.write_model(@inventory);
+        }
+
+        fn create_ability(
+            ref self: ContractState,
+            ability_id: u256,
+            ability_type: felt252,
+            power: u256,
+            cooldown: u8,
+            mana_cost: u8,
+            level_required: u8,
+        ) -> u256 {
+            let mut world = self.world_default();
+
+            let ability = Ability {
+                id: ability_id, name: ability_type, power, cooldown, mana_cost, level_required,
+            };
+
+            world.write_model(@ability);
+
+            ability_id
         }
     }
 
@@ -226,7 +295,6 @@ pub mod brawl_game {
         }
     }
 
-
     #[generate_trait]
     impl InternalImpl of InternalTrait {
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
@@ -235,6 +303,55 @@ pub mod brawl_game {
 
         fn player_system_dispatcher(self: @ContractState) -> IPlayerSystemDispatcher {
             IPlayerSystemDispatcher { contract_address: self.player_system_contract_address.read() }
+        }
+
+        fn validate_target(self: @ContractState, target_id: ContractAddress) -> bool {
+            let world = self.world_default();
+            let player_system_dispatcher = self.player_system_dispatcher();
+            let target_player: Player = world.read_model(target_id);
+
+            if target_player.is_zero() {
+                true // TODO: Non-player targets are valid?
+            } else {
+                player_system_dispatcher.is_alive(target_id)
+            }
+        }
+
+        fn apply_ability_effect(
+            self: @ContractState,
+            effect_type: AbilityEffectType,
+            effect_amount: u32,
+            target: ContractAddress,
+            target_is_valid_player: bool,
+        ) {
+            if !target_is_valid_player {
+                return;
+            }
+
+            let player_system_dispatcher = self.player_system_dispatcher();
+
+            match effect_type {
+                AbilityEffectType::Damage => {
+                    let damage_amount: u16 = effect_amount.try_into().unwrap();
+                    player_system_dispatcher.take_damage(target, damage_amount);
+                },
+                AbilityEffectType::Heal => {
+                    let heal_amount: u16 = effect_amount.try_into().unwrap();
+                    player_system_dispatcher.heal(target, heal_amount);
+                },
+                AbilityEffectType::Shield => {
+                    let boost_amount: u16 = effect_amount.try_into().unwrap();
+                    player_system_dispatcher.upgrade_max_hp(target, boost_amount);
+                },
+                AbilityEffectType::ManaRestore => {
+                    let mana_amount: u8 = effect_amount.try_into().unwrap();
+                    player_system_dispatcher.regenerate_mana(target, mana_amount);
+                },
+                AbilityEffectType::DamageOverTime => {
+                    let damage_amount: u16 = effect_amount.try_into().unwrap();
+                    player_system_dispatcher.take_damage(target, damage_amount);
+                },
+            }
         }
     }
 }
