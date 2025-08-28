@@ -24,10 +24,10 @@ pub impl CoinsImpl of CoinsTrait {
 
     // Add coins to player's balance
     fn add_coins(ref self: Coins, amount: u64) -> bool {
+        // Pre-addition bound check to prevent overflow
+        assert(amount <= 18446744073709551615_u64 - self.amount, errors::OVERFLOW_ERROR);
+
         let new_amount = self.amount + amount;
-
-        assert(new_amount >= self.amount, errors::OVERFLOW_ERROR);
-
         self.amount = new_amount;
         true
     }
@@ -146,5 +146,34 @@ mod tests {
         coins.add_coins(1000000);
         coins.add_coins(9000000);
         assert(coins.amount == 10000000, 'Should handle large amounts');
+    }
+
+    #[test]
+    fn test_add_coins_boundary_success() {
+        let addr: ContractAddress = contract_address_const::<0xABC>();
+        let mut coins = CoinsImpl::new(addr);
+
+        // MAX - 1 then +1 => MAX
+        let max_minus_one: u64 = 18446744073709551614_u64;
+        let one: u64 = 1_u64;
+
+        assert(coins.add_coins(max_minus_one), 'Should add MAX-1');
+        assert(coins.add_coins(one), 'Should add 1');
+        assert(
+            coins.amount == 18446744073709551615_u64,
+            'Balance should equal u64 MAX'
+        );
+    }
+
+    #[test]
+    #[should_panic(expected: ('Coins: Overflow detected',))]
+    fn test_add_coins_overflow_panic() {
+        let addr: ContractAddress = contract_address_const::<0xDEF>();
+        let mut coins = CoinsImpl::new(addr);
+
+        // Adding MAX succeeds, then adding +1 should overflow
+        assert(coins.add_coins(18446744073709551615_u64), 'Should add MAX');
+        // This must panic with the correct message
+        let _ = coins.add_coins(1_u64);
     }
 }
