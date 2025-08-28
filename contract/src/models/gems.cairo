@@ -23,10 +23,10 @@ pub impl GemsImpl of GemsTrait {
     }
 
     fn add_gems(ref self: Gems, amount: u64) -> bool {
+        // Pre-addition bound check to prevent overflow
+        assert(amount <= 18446744073709551615_u64 - self.amount, errors::OVERFLOW_ERROR);
+
         let new_amount = self.amount + amount;
-
-        assert(new_amount >= self.amount, errors::OVERFLOW_ERROR);
-
         self.amount = new_amount;
         true
     }
@@ -143,5 +143,31 @@ mod tests {
         gems.add_gems(5000);
         gems.add_gems(10000);
         assert(gems.amount == 15000, 'Should handle large amounts');
+    }
+
+    #[test]
+    fn test_add_gems_boundary_success() {
+        let addr: ContractAddress = contract_address_const::<0xABC>();
+        let mut gems = GemsImpl::new(addr);
+
+        let max_minus_one: u64 = 18446744073709551614_u64;
+        let one: u64 = 1_u64;
+
+        assert(gems.add_gems(max_minus_one), 'Should add MAX-1');
+        assert(gems.add_gems(one), 'Should add 1');
+        assert(
+            gems.amount == 18446744073709551615_u64,
+            'Balance should equal u64 MAX'
+        );
+    }
+
+    #[test]
+    #[should_panic(expected: ('Gems: Overflow detected',))]
+    fn test_add_gems_overflow_panic() {
+        let addr: ContractAddress = contract_address_const::<0xDEF>();
+        let mut gems = GemsImpl::new(addr);
+
+        assert(gems.add_gems(18446744073709551615_u64), 'Should add MAX');
+        let _ = gems.add_gems(1_u64);
     }
 }
