@@ -68,18 +68,20 @@ pub impl EnemyImpl of EnemySystem {
             return Result::Err(errors::InvalidSpeed);
         }
 
-        Result::Ok(Enemy {
-            id,
-            enemy_type,
-            health,
-            speed,
-            x,
-            y,
-            is_alive: true,
-            coin_reward,
-            xp_reward,
-            reward_claimed: false
-        })
+        Result::Ok(
+            Enemy {
+                id,
+                enemy_type,
+                health,
+                speed,
+                x,
+                y,
+                is_alive: true,
+                coin_reward,
+                xp_reward,
+                reward_claimed: false,
+            },
+        )
     }
 
     fn take_damage(self: @Enemy, amount: u32) -> Enemy {

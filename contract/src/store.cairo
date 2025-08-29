@@ -294,7 +294,21 @@ pub impl StoreImpl of StoreTrait {
         let mut trap = self.read_trap(trap_id);
         assert(trap.is_active == true, 'Trap not active');
         assert(TrapImpl::check_trigger(@trap, enemy_pos) == true, 'Enemy not in range');
+
+        // The TrapImpl::trigger function will set is_active to false and return the damage.
+        // If it was already inactive (e.g., another transaction got there first), it returns 0.
         let damage = TrapImpl::trigger(ref trap);
+
+        // If damage is 0, it means the trap was not active when TrapImpl::trigger was called.
+        // This could happen if a concurrent transaction successfully triggered and updated
+        // the global state to inactive before this transaction's TrapImpl::trigger was executed.
+        // In this scenario, we just return 0, as no new damage should be dealt.
+        if damage == 0 {
+            return 0;
+        }
+
+        // This transaction successfully triggered the trap and received non-zero damage.
+        // Write the now-inactive trap state back to the world.
         self.write_trap(@trap);
         damage
     }
