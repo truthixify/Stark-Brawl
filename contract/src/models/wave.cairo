@@ -164,19 +164,16 @@ pub impl WaveImpl of WaveSystem {
             errors::InvalidTimestamp,
         );
 
-        // Check spawn timing - be more lenient in test environment
+        // Check spawn timing
         // Only validate timing if this is not the first spawn and we have a valid interval
         if *self.last_spawn_tick > 0 && *self.tick_interval > 0 {
-            // In test environment, be more flexible with timing
             let required_interval = (*self.tick_interval).into();
             if current_timestamp < *self.last_spawn_tick + required_interval {
-                // In test environment, allow spawns if the difference is small
                 let time_diff = current_timestamp - *self.last_spawn_tick;
                 if time_diff == 0
-                    && current_timestamp > 0 { // Allow same timestamp spawns in test environment
-                } else {
-                    assert(false, errors::InvalidSpawnTick);
-                }
+                    && current_timestamp > 0 {} else {
+                        assert(false, errors::InvalidSpawnTick);
+                    }
             }
         }
 
