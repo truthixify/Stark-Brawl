@@ -133,9 +133,6 @@ pub mod brawl_game {
                     target_id,
                     is_target_valid,
                 );
-
-            // Update player state
-            world.write_model(@player);
         }
 
         fn take_damage(ref self: ContractState, amount: u32) {
