@@ -78,8 +78,13 @@ pub mod brawl_game {
             let current_timestamp = get_block_timestamp();
             let player_system_dispatcher = self.player_system_dispatcher();
 
+            // Check if the player exists
             let player: Player = world.read_model(caller);
+            assert(!player.is_zero(), 'Player does not exist');
+
+            // Check if the ability exists
             let ability: Ability = world.read_model(ability_id);
+            assert(ability.is_non_zero(), 'Ability not found');
 
             // Gather validation data
             let player_level = player.level;
@@ -91,12 +96,21 @@ pub mod brawl_game {
                 .has_ability_equipped(caller, ability_id.into());
             let is_target_valid = self.validate_target(target_id);
 
+            // Validate ability requirements using AbilityTrait::validate
+            ability.validate(player_level, player_mana);
+
+            // Additional validations
+            assert(is_player_alive, 'Player not alive');
+            assert(is_ability_equipped, 'Ability not equipped');
+            assert(current_timestamp >= cooldown_until, 'Ability on cooldown');
+            assert(is_target_valid, 'Invalid target');
+
             // Create usage context
             let context = AbilityUsageContext {
                 ability_id: ability_id.into(), caster: caller, target: target_id, current_timestamp,
             };
 
-            // Process the ability usage
+            // Process ability usage
             let usage_result = ability
                 .process_usage(
                     context,

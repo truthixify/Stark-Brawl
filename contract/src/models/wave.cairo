@@ -144,7 +144,7 @@ pub impl WaveImpl of WaveSystem {
 
         // Aallow spawns if timestamps are the same or progressed
         if current_timestamp == *self.last_spawn_tick {
-            return true; 
+            return true;
         }
 
         current_timestamp >= *self.last_spawn_tick + (*self.tick_interval).into()
@@ -200,7 +200,7 @@ pub impl WaveImpl of WaveSystem {
     fn get_current_timestamp() -> u64 {
         let timestamp = get_block_timestamp();
         if timestamp == 0 {
-            1000_u64 
+            1000_u64
         } else {
             timestamp
         }
