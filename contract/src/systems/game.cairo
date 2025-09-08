@@ -7,7 +7,7 @@ pub trait IBrawlGame<T> {
     fn take_damage(ref self: T, amount: u32);
     fn attack_enemy(ref self: T, enemy_id: u64, damage: u32);
     fn get_player_status(ref self: T) -> PlayerStatus;
-    fn use_item(ref self: T, item_id: u32);
+    fn use_item(ref self: T, item_id: u32, inventory_id: u32);
     fn create_ability(
         ref self: T,
         ability_id: u256,
@@ -182,7 +182,7 @@ pub mod brawl_game {
             }
         }
 
-        fn use_item(ref self: ContractState, item_id: u32) {
+        fn use_item(ref self: ContractState, item_id: u32, inventory_id: u32) {
             let mut world = self.world_default();
             let caller = get_caller_address();
 
@@ -197,10 +197,11 @@ pub mod brawl_game {
 
             // Validate item exists
             let item: Item = world.read_model(item_id);
+            assert(item.name.len() != 0, 'Item not found');
             assert(item.usable, 'Item not usable');
 
             // Validate item is in inventory
-            let mut inventory: Inventory = world.read_model(caller);
+            let mut inventory: Inventory = world.read_model(inventory_id);
             assert(inventory.is_non_zero(), 'No inventory for player');
             let has_item = inventory.has_item(item_id);
             assert(has_item, 'Item not in inventory');
