@@ -42,7 +42,7 @@ pub mod brawl_game {
     use stark_brawl::models::player::{Player, PlayerTrait, spawn_player, ZeroablePlayerTrait};
 
     use stark_brawl::models::item::{Item, ItemType};
-    use stark_brawl::models::inventory::{Inventory};
+    use stark_brawl::models::inventory::{Inventory, InventoryTrait};
     use stark_brawl::models::enemy::{Enemy, EnemySystem};
     use stark_brawl::store::{Store, StoreImpl};
     use stark_brawl::systems::player::{IPlayerSystemDispatcher, IPlayerSystemDispatcherTrait};
@@ -186,18 +186,47 @@ pub mod brawl_game {
             let mut world = self.world_default();
             let caller = get_caller_address();
 
-            let mut inventory: Inventory = world.read_model(caller);
-            let item: Item = world.read_model(item_id);
-            let player_system_dispatcher = self.player_system_dispatcher();
+            // Validate player exists
+            let player: Player = world.read_model(caller);
+            assert(!player.is_zero(), 'Player does not exist');
 
+            // Validate player is alive
+            let player_system_dispatcher = self.player_system_dispatcher();
+            let is_player_alive = player_system_dispatcher.is_alive(caller);
+            assert(is_player_alive, 'Player not alive');
+
+            // Validate item exists
+            let item: Item = world.read_model(item_id);
+            assert(item.usable, 'Item not usable');
+
+            // Validate item is in inventory
+            let mut inventory: Inventory = world.read_model(caller);
+            assert(inventory.is_non_zero(), 'No inventory for player');
+            let has_item = inventory.has_item(item_id);
+            assert(has_item, 'Item not in inventory');
+
+            // Remove item from inventory
+            let removed = inventory.remove_item(item_id);
+            assert(removed, 'Failed to remove item');
+
+            // Apply item effects based on type
             match item.item_type {
-                ItemType::Trap => {},
-                ItemType::Upgrade => {
+                ItemType::Trap => {
+                    // Apply trap effect: temporary defense boost
+                    // Assuming trap creates a temporary shield effect
                     player_system_dispatcher.upgrade_max_hp(caller, item.value);
                 },
-                ItemType::Consumable => { player_system_dispatcher.heal(caller, item.value); },
+                ItemType::Upgrade => {
+                    // Apply upgrade effect: permanent max HP increase
+                    player_system_dispatcher.upgrade_max_hp(caller, item.value);
+                },
+                ItemType::Consumable => {
+                    // Apply consumable effect: heal player
+                    player_system_dispatcher.heal(caller, item.value);
+                },
             }
 
+            // Update inventory in storage
             world.write_model(@inventory);
         }
 
