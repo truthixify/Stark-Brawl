@@ -48,6 +48,8 @@ pub mod brawl_game {
     use stark_brawl::store::{Store, StoreImpl};
     use stark_brawl::systems::player::{IPlayerSystemDispatcher, IPlayerSystemDispatcherTrait};
 
+    use core::num::traits::Bounded;
+
     #[storage]
     struct Storage {
         game_counter: u32,
@@ -64,15 +66,17 @@ pub mod brawl_game {
         fn join_game(ref self: ContractState) {
             let mut world = self.world_default();
             let caller = get_caller_address();
-
             let existing_player: Player = world.read_model(caller);
-            assert(
-                existing_player.is_zero() || !existing_player.in_game,
-                'Player already in active game',
-            );
 
-            let player = spawn_player(caller);
-            world.write_model(@player);
+            if existing_player.is_zero() {
+                let player = spawn_player(caller);
+                world.write_model(@player);
+            } else {
+                assert(!existing_player.in_game, 'Player already in active game');
+                let mut player = existing_player;
+                player.in_game = true;
+                world.write_model(@player);
+            }
 
             let player_system_dispatcher = self.player_system_dispatcher();
             player_system_dispatcher.initialize(caller);
@@ -146,11 +150,16 @@ pub mod brawl_game {
             let caller = get_caller_address();
             let mut world = self.world_default();
             let player: Player = world.read_model(caller);
+
             assert(!player.is_zero(), 'Player does not exist');
             assert(player.in_game, 'Player not in active game');
 
             let player_system_dispatcher = self.player_system_dispatcher();
-            player_system_dispatcher.take_damage(caller, amount.try_into().unwrap());
+
+            assert(amount <= Bounded::MAX, 'Damage too large');
+
+            let damage_amount: u16 = amount.try_into().unwrap();
+            player_system_dispatcher.take_damage(caller, damage_amount);
 
             // Check if died and cleanup game session
             if !player_system_dispatcher.is_alive(caller) {
@@ -198,6 +207,12 @@ pub mod brawl_game {
         fn get_player_status(ref self: ContractState) -> PlayerStatus {
             let caller = get_caller_address();
             let world = self.world_default();
+            let player: Player = world.read_model(caller);
+
+            if player.is_zero() {
+                return PlayerStatus::Waiting;
+            }
+
             let player: Player = world.read_model(caller);
             let player_system_dispatcher = self.player_system_dispatcher();
             let alive = player_system_dispatcher.is_alive(caller);
